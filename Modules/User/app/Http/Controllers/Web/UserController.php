@@ -5,118 +5,158 @@ namespace Modules\User\Http\Controllers\Web;
 use App\Constants\TableConstants;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTableSettingsRequest;
-use App\Models\TableSettings;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
 use Modules\User\Http\Requests\UserStoreRequest;
 use Modules\User\Http\Requests\UserUpdateRequest;
 use Modules\User\Models\User;
 use Spatie\Permission\Models\Role;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Modules\Division\Models\Division;
+use App\Models\TableSettings;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    protected $roleModel;
+    protected $divisionModel;
+    protected $userModel;
+
+    public function __construct(Role $role, Division $division, User $user)
+    {
+        $this->roleModel = $role;
+        $this->divisionModel = $division;
+        $this->userModel = $user;
+    }
+
     public function index(Request $request)
     {
-        $roles = Role::all();
+        $roles = $this->roleModel->all();
         $user = Auth::user();
-        
-        $savedSettings = $this->_getTableSettingsForModel(User::class);
+        $savedSettings = $this->getTableSettingsForUser(User::class);
 
-        $limits = [5, 10, 20, 50, 100];
-        $limit = $request->get('limit', $savedSettings->limit ?? 10);
+        $limit = $this->getLimit($request, $savedSettings);
         $sortBy = $request->get('sort_by', 'name');
         $sortOrder = $request->get('sort_order', 'ASC');
 
-        // Retrieve all columns and visible columns
-        [$allColumns, $visibleColumns] = $this->_getColumnsForTable();
-
-        // Exclude 'roles' from the database query
-        $excludedColumns = ['roles'];
+        [$allColumns, $visibleColumns] = $this->getColumnsForTable();
+        $excludedColumns = ['roles', 'division_name'];
         $queryColumns = array_diff($visibleColumns, $excludedColumns);
 
-        $users = User::search(
-            keyword: $request->q,
-            columns: $queryColumns
-        )
-        ->sort(
-            sort_by: $sortBy,
-            sort_order: $sortOrder
-        );
-        
-        // Apply role filter if present
-        if ($role = $request->role) {
-            $users->whereHas('roles', fn($query) => $query->where('name', $role));
-        }
-        
-        // Paginate and transform the collection
-        $users = $users->paginate($limit)->through(fn($user) => $user->setAttribute('roles', $user->roles->pluck('name')->toArray()));
+        $usersQuery = $this->userModel->with(['roles', 'division:id,name'])
+            ->when($request->q, fn($query) => $this->applySearchFilter($query, $request, $queryColumns))
+            ->when($request->role, fn($query) => $this->filterByRole($query, $request))
+            ->orderBy($sortBy, $sortOrder);
+
+        $users = $this->paginateUsers($usersQuery, $limit);
 
         return view('user::index', [
-            'title' => 'User List',
+            'title' => 'Daftar Pengguna',
             'users' => $users,
             'columns' => $allColumns,
             'visibleColumns' => $visibleColumns,
             'excludedSortColumns' => $excludedColumns,
-            'limits' => $limits,
+            'limits' => [5, 10, 20, 50, 100],
             'roles' => $roles,
-            'savedSettings' => $savedSettings
-        ]);        
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        $roles = Role::all();
-
-        return view('user::create', [
-            'title' => 'New User',
-            'roles' => $roles
+            'savedSettings' => $savedSettings,
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(UserStoreRequest $request)
+    private function applySearchFilter($query, $request, $queryColumns)
     {
-        $userData = $request->all();
-        $userData['password'] = Hash::make($request->input('password'));
-
-        $user = User::create($userData);
-        $role = Role::findById($request->input('role_id'));
-        $user->assignRole($role->name);
-
-        return redirect()->route('users.index')->with('success', 'User created successfully.');
+        $query->where(function ($query) use ($request, $queryColumns) {
+            foreach ($queryColumns as $column) {
+                $query->orWhere("users.{$column}", 'LIKE', '%' . $request->q . '%');
+            }
+            if (in_array('division_name', $queryColumns)) {
+                $query->orWhere('divisions.name', 'LIKE', '%' . $request->q . '%');
+            }
+        });
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+    private function filterByRole($query, $request)
+    {
+        return $query->whereHas('roles', fn($q) => $q->where('name', $request->role));
+    }
+
+    private function getLimit(Request $request, $savedSettings)
+    {
+        return $request->get('limit', $savedSettings->limit ?? 10);
+    }
+
+    private function getColumnsForTable(): array
+    {
+        $allColumns = TableConstants::USER_TABLE_COLUMNS;
+        $tableSettings = $this->getTableSettingsForUser(User::class);
+
+        return $tableSettings
+            ? [$allColumns, json_decode($tableSettings->visible_columns, true) ?: $allColumns]
+            : [$allColumns, $allColumns];
+    }
+
+    private function getTableSettingsForUser(string $modelClass)
+    {
+        $user = Auth::user();
+
+        if ($user && $user->tableSettings) {
+            return $user->tableSettings->where('model_name', $modelClass)->first();
+        }
+
+        return null;
+    }
+
+    private function paginateUsers($usersQuery, $limit)
+    {
+        return $usersQuery->paginate($limit)->through(fn($user) => $user->setAttribute(
+            'roles',
+            $user->roles->pluck('name')->toArray()
+        ));
+    }
+
+    public function create()
+    {
+        return view('user::create', [
+            'title' => 'Pengguna Baru',
+            'roles' => $this->roleModel->all(),
+            'divisions' => $this->divisionModel->all(),
+        ]);
+    }
+
+    public function store(UserStoreRequest $request)
+    {
+        try {
+            $userData = $request->validated();
+            $userData['password'] = Hash::make($request->input('password'));
+
+            $user = $this->userModel->create($userData);
+            $role = $this->roleModel->find($request->input('role_id'));
+            $user->assignRole($role->name);
+
+            if ($request->has('division_id')) {
+                $user->division()->associate($this->divisionModel->find($request->input('division_id')));
+                $user->save();
+            }
+
+            return redirect()->route('users.index')->with('success', 'Pengguna berhasil dibuat.');
+        } catch (\Exception $e) {
+            Log::error('Kesalahan saat membuat pengguna: ' . $e->getMessage());
+            return redirect()->route('users.index')->with('error', 'Gagal membuat pengguna.');
+        }
+    }
+
     public function edit(User $user)
     {
         return view('user::edit', [
-            'title' => 'Edit User',
+            'title' => 'Edit Pengguna',
             'user' => $user,
-            'roles' => Role::all()
+            'roles' => $this->roleModel->all(),
+            'divisions' => $this->divisionModel->all(),
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UserUpdateRequest $request, User $user)
     {
-        $user = User::findOrFail($user->id);
-
         try {
             $userData = $request->all();
             if ($request->has('password')) {
@@ -124,53 +164,46 @@ class UserController extends Controller
             }
 
             $user->update($userData);
-            $role = Role::findById($request->input('role_id'));
+            $role = $this->roleModel->findById($request->input('role_id'));
             $user->syncRoles([$role->name]);
 
-            return redirect()->route('users.index')->with('success', 'User updated successfully.');
+            if ($request->has('division_id')) {
+                $user->division()->associate($this->divisionModel->find($request->input('division_id')));
+                $user->save();
+            }
+
+            return redirect()->route('users.index')->with('success', 'Pengguna berhasil diperbarui.');
         } catch (\Exception $e) {
-            Log::error('Error updating user: ' . $e->getMessage());
-            return redirect()->route('users.index')->with('error', 'Failed to update the user.');
+            Log::error('Kesalahan saat memperbarui pengguna: ' . $e->getMessage());
+            return redirect()->route('users.index')->with('error', 'Gagal memperbarui pengguna.');
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(User $user)
     {
         try {
-            User::findOrFail($user->id)->delete();
-            return redirect()->route('users.index')->with('success', 'User deleted successfully.');
+            $user->delete();
+            return redirect()->route('users.index')->with('success', 'Pengguna berhasil dihapus.');
         } catch (ModelNotFoundException $e) {
-            Log::error('User not found: ' . $e->getMessage());
-            return redirect()->route('users.index')->with('error', 'User not found.');
+            Log::error('Pengguna tidak ditemukan: ' . $e->getMessage());
+            return redirect()->route('users.index')->with('error', 'Pengguna tidak ditemukan.');
         } catch (\Exception $e) {
-            Log::error('Error deleting user: ' . $e->getMessage());
-            return redirect()->route('users.index')->with('error', 'Failed to delete the user.');
+            Log::error('Kesalahan saat menghapus pengguna: ' . $e->getMessage());
+            return redirect()->route('users.index')->with('error', 'Gagal menghapus pengguna.');
         }
     }
 
-    /**
-     * Save table settings for the user.
-     */
     public function saveTableSettings(StoreTableSettingsRequest $request)
     {
         try {
-            $modelClass = User::class;
-            $modelInstance = app($modelClass)->newInstance();
-    
-            $tableName = $modelInstance->getTable();
-            $modelName = get_class($modelInstance);
-    
             $columns = $request->input('columns', []);
-            $showNumbering = $request->has('show_numbering') ? true : false;
-    
+            $showNumbering = $request->has('show_numbering');
+
             TableSettings::updateOrCreate(
                 [
                     'user_id' => Auth::id(),
-                    'table_name' => $tableName,
-                    'model_name' => $modelName,
+                    'table_name' => User::class,
+                    'model_name' => User::class,
                 ],
                 [
                     'visible_columns' => json_encode($columns),
@@ -178,55 +211,11 @@ class UserController extends Controller
                     'show_numbering' => $showNumbering,
                 ]
             );
-    
-            return redirect()->back()->with('success', 'Table settings saved successfully!');
-        } catch (ValidationException $e) {
-            throw $e;
+
+            return redirect()->back()->with('success', 'Pengaturan tabel berhasil disimpan!');
         } catch (\Exception $e) {
-            // Log the error and return a failure message
-            Log::error('Error saving table settings: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Failed to save table settings.');
+            Log::error('Kesalahan saat menyimpan pengaturan tabel: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal menyimpan pengaturan tabel.');
         }
-    }
-
-    /**
-     * Get all columns and visible columns for the table.
-     */
-    private function _getColumnsForTable(): array
-    {
-        $allColumns = TableConstants::USER_TABLE_COLUMNS;
-
-        // Use the reusable function to get table settings
-        $tableSettings = $this->_getTableSettingsForModel(User::class);
-
-        // Extract visible columns or use default if not set
-        $visibleColumns = $tableSettings->visible_columns ?? $allColumns;
-
-        // Decode JSON if necessary
-        $visibleColumns = is_string($visibleColumns) ? json_decode($visibleColumns, true) : $visibleColumns;
-
-        return [$allColumns, $visibleColumns];
-    }
-
-    private function _getTableSettingsForModel(string $modelClass)
-    {
-        // Create a new instance of the model to retrieve its table name
-        $modelInstance = app($modelClass)->newInstance();
-        $tableName = $modelInstance->getTable();
-
-        // Check if Auth::user()->tableSettings is null
-        $userTableSettings = Auth::user()->tableSettings;
-
-        if (is_null($userTableSettings)) {
-            return null;
-        }
-
-        // Retrieve user's table settings for the given model and table
-        $tableSettings = $userTableSettings
-            ->where('model_name', $modelClass)
-            ->where('table_name', $tableName)
-            ->first();
-
-        return $tableSettings;
     }
 }

@@ -3,5 +3,7 @@
     "Auth": true,
     "Dashboard": true,
     "RolesAndPermissions": true,
-    "Profile": true
+    "Profile": true,
+    "Division": true,
+    "Risk": true
 }

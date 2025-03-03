@@ -7,9 +7,6 @@ use Modules\User\Models\User;
 
 class UserDatabaseSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         User::factory()->create([
