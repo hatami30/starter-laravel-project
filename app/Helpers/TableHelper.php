@@ -11,7 +11,8 @@ class TableHelper
         $columns = [
             'users' => TableConstants::USER_TABLE_COLUMNS,
             'roles_and_permissions' => TableConstants::ROLE_AND_PERMISSION_TABLE_COLUMNS,
-            // Add other tables here
+            'divisions' => TableConstants::DIVISION_TABLE_COLUMNS,
+            'risks' => TableConstants::RISK_TABLE_COLUMNS,
         ];
 
         return $columns[$tableName] ?? [];

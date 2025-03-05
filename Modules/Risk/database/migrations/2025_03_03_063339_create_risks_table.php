@@ -14,18 +14,18 @@ return new class extends Migration {
             $table->id();
 
             // Reporter Details
-            $table->string('reporters_name');
-            $table->string('reporters_position');
-            $table->string('contact_no');
+            $table->string('reporters_name');  // Required
+            $table->string('reporters_position');  // Required
+            $table->string('contact_no', 15);  // If phone numbers are limited to 15 characters
 
             // Risk Details
-            $table->string('risk_name');
-            $table->text('risk_description');
+            $table->string('risk_name', 255);  // Limiting length for performance
+            $table->text('risk_description');  // Required
 
             // Status
-            $table->enum('risk_status', ['Provisional', 'Open', 'Open (Not Published)', 'Closed', 'Re-Opened']);
-            $table->date('date_opened');
-            $table->date('next_review_date');
+            $table->enum('risk_status', ['Provisional', 'Open', 'Open (Not Published)', 'Closed', 'Re-Opened']);  // Required
+            $table->date('date_opened');  // Required
+            $table->date('next_review_date');  // Required
 
             // Reminder Period
             $table->enum('reminder_period', [
@@ -44,20 +44,20 @@ return new class extends Migration {
                 '3 Months (90 Days) before the Due Date',
                 '6 Months (180 Days) before the Due Date',
                 '1 Year (365 Days) before the Due Date'
-            ]);
-            $table->date('reminder_date');
+            ]);  // Required
+            $table->date('reminder_date');  // Required
 
             // Classification
-            $table->enum('type_of_risk', ['Corporate Risk', 'Hospital Risk', 'Project Risk', 'Emerging Risk']);
+            $table->enum('type_of_risk', ['Corporate Risk', 'Hospital Risk', 'Project Risk', 'Emerging Risk']);  // Required
             $table->enum('category', [
                 'Business Process and System',
                 'Consumer Quality and Safety and Environment',
                 'Health and Safety',
                 'Reputation and Mission',
                 'Service Delivery'
-            ]);
-            $table->string('location');
-            $table->string('unit');
+            ]);  // Required
+            $table->string('location', 100);  // Required
+            $table->string('unit', 100);  // Required
             $table->enum('relevant_committee', [
                 'Antimicroba Resistency Control',
                 'Ethics',
@@ -78,18 +78,18 @@ return new class extends Migration {
                 'Quality and Patient Safety',
                 'TB Dots',
                 'Nil'
-            ]);
+            ]);  // Required
 
             // Key Personnel
-            $table->string('accountable_manager');
-            $table->string('responsible_supervisor');
-            $table->enum('notify_of_associated_incidents', ['Yes', 'No']);
+            $table->string('accountable_manager');  // Required
+            $table->string('responsible_supervisor');  // Required
+            $table->enum('notify_of_associated_incidents', ['Yes', 'No']);  // Required
 
             // Causes, Consequences, and Controls
-            $table->text('causes');
-            $table->text('consequences');
-            $table->text('controls');
-            $table->enum('control', ['Minimal', 'Minor', 'Moderate', 'Major', 'Serious']);
+            $table->text('causes');  // Required
+            $table->text('consequences');  // Required
+            $table->text('controls');  // Required
+            $table->enum('control', ['Minimal', 'Minor', 'Moderate', 'Major', 'Serious']);  // Required
             $table->enum('control_hierarchy', [
                 'Risk Avoidance',
                 'Risk Acceptance',
@@ -102,11 +102,11 @@ return new class extends Migration {
                 'Engineering',
                 'Administrative',
                 'Personal Protective Equipment'
-            ]);
-            $table->string('control_cost')->nullable();  // Nullable jika tidak ada biaya terkait
-            $table->date('effective_date');
-            $table->string('last_reviewed_by');
-            $table->date('last_reviewed_on');
+            ]);  // Required
+            $table->decimal('control_cost', 10, 2)->nullable();  // Nullable and with precision
+            $table->date('effective_date');  // Required
+            $table->string('last_reviewed_by');  // Required
+            $table->date('last_reviewed_on');  // Required
             $table->enum('assessment', [
                 'Review Pending',
                 'Review Underway',
@@ -114,17 +114,17 @@ return new class extends Migration {
                 'Partial Effectiveness Only',
                 'Effective but should be improved',
                 'Effective - No Change Required'
-            ]);
-            $table->enum('overall_control_assessment', ['Excellent', 'Good', 'Moderate', 'Poor']);
+            ]);  // Required
+            $table->enum('overall_control_assessment', ['Excellent', 'Good', 'Moderate', 'Poor']);  // Required
 
             // Residual Risk
-            $table->string('residual_consequences');
-            $table->enum('residual_likelihood', ['Frequent', 'Likely', 'Possible', 'Unlikely', 'Rare']);
-            $table->string('residual_score');
-            $table->text('residual_risk');
+            $table->string('residual_consequences');  // Required
+            $table->enum('residual_likelihood', ['Frequent', 'Likely', 'Possible', 'Unlikely', 'Rare']);  // Required
+            $table->decimal('residual_score', 5, 2);  // Numeric score with two decimal places
+            $table->text('residual_risk');  // Required
 
             // Source of Assurance
-            $table->text('source_of_assurance');
+            $table->text('source_of_assurance');  // Required
             $table->enum('assurance_category', [
                 'Activity Throughout',
                 'Audit and Finance Committee',
@@ -149,23 +149,27 @@ return new class extends Migration {
                 'Project Control',
                 'Quality Committee',
                 'Recruitment, Retention and Sick Leave Rates'
-            ]);
+            ]);  // Required
 
             // Actions
-            $table->text('actions');
-            $table->date('action_assigned_date');
-            $table->date('action_by_date');
-            $table->text('action_description');
-            $table->string('allocated_to')->nullable();  // Nullable jika tidak ada alokasi
-            $table->date('completed_on')->nullable();  // Nullable karena tidak selalu ada
-            $table->text('action_response')->nullable();  // Nullable karena tidak selalu ada respons
+            $table->text('actions');  // Required
+            $table->date('action_assigned_date');  // Required
+            $table->date('action_by_date');  // Required
+            $table->text('action_description');  // Required
+            $table->string('allocated_to')->nullable();  // Nullable
+            $table->date('completed_on')->nullable();  // Nullable
+            $table->text('action_response')->nullable();  // Nullable
 
             // Progress Note and Document
-            $table->text('progress_note');
-            $table->text('journal_type');
-            $table->text('journal_description')->nullable();  // Nullable, tergantung kebutuhan
-            $table->timestamp('date_stamp')->nullable();  // Nullable karena tidak semua entri membutuhkan timestamp
-            $table->string('document')->nullable();  // Nullable karena tidak semua entri memiliki dokumen yang diupload
+            $table->text('progress_note');  // Required
+            $table->text('journal_type');  // Required
+            $table->text('journal_description')->nullable();  // Nullable
+            $table->timestamp('date_stamp')->nullable();  // Nullable
+            $table->string('document')->nullable();  // Nullable
+
+            // Foreign Keys
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');  // Required
+            $table->foreignId('division_id')->constrained()->onDelete('cascade');  // Required
 
             $table->timestamps();
             $table->softDeletes();

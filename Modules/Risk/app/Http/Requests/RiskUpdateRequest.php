@@ -79,18 +79,19 @@ class RiskUpdateRequest extends FormRequest
             'journal_type' => 'nullable|string|max:255',
             'journal_description' => 'nullable|string|max:1000',
             'date_stamp' => 'nullable|date_format:Y-m-d H:i:s',
-            'document' => 'nullable|mimes:pdf,docx,xlsx,png,jpg,jpeg|max:2048', // Example: accepts file upload
+            'document' => 'nullable|file|mimes:pdf,doc,docx,png,jpg,jpeg|max:2048', // Example: accepts file upload
+
+            // User and Division
+            'user_id' => 'nullable|exists:users,id',
+            'division_id' => 'nullable|exists:divisions,id',
         ];
     }
 
     /**
-     * Determine if the user is authorized to make this request.
+     * Define custom validation messages.
+     *
+     * @return array
      */
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     public function messages(): array
     {
         return [
@@ -101,9 +102,15 @@ class RiskUpdateRequest extends FormRequest
             'max' => ':attribute tidak boleh lebih dari :max karakter.',
             'mimes' => ':attribute harus berupa file dengan format: :values.',
             'nullable' => ':attribute boleh kosong.',
+            'exists' => ':attribute tidak ditemukan.',
         ];
     }
 
+    /**
+     * Define attribute names for validation.
+     *
+     * @return array
+     */
     public function attributes(): array
     {
         return [
@@ -152,6 +159,8 @@ class RiskUpdateRequest extends FormRequest
             'journal_description' => 'Deskripsi Jurnal',
             'date_stamp' => 'Stempel Waktu',
             'document' => 'Dokumen',
+            'user_id' => 'ID Pengguna',
+            'division_id' => 'ID Divisi',
         ];
     }
 }

@@ -126,21 +126,34 @@ class UserController extends Controller
     public function store(UserStoreRequest $request)
     {
         try {
-            $userData = $request->validated();
-            $userData['password'] = Hash::make($request->input('password'));
+            $validatedData = $request->validated();
 
-            $user = $this->userModel->create($userData);
-            $role = $this->roleModel->find($request->input('role_id'));
-            $user->assignRole($role->name);
+            if (isset($validatedData['password'])) {
+                $validatedData['password'] = Hash::make($validatedData['password']);
+            }
+
+            $user = $this->userModel->create($validatedData);
+
+            if ($request->has('role_id')) {
+                $role = $this->roleModel->findById($request->input('role_id'));
+                $user->assignRole($role);
+            }
 
             if ($request->has('division_id')) {
                 $user->division()->associate($this->divisionModel->find($request->input('division_id')));
                 $user->save();
             }
 
+            // Log the successful creation
+            Log::info('User created successfully', ['user' => $user->id]);
+
             return redirect()->route('users.index')->with('success', 'Pengguna berhasil dibuat.');
         } catch (\Exception $e) {
-            Log::error('Kesalahan saat membuat pengguna: ' . $e->getMessage());
+            // Log any errors that occur
+            Log::error('Error creating user: ' . $e->getMessage(), [
+                'stack' => $e->getTraceAsString(),
+                'request' => $request->all(),
+            ]);
             return redirect()->route('users.index')->with('error', 'Gagal membuat pengguna.');
         }
     }

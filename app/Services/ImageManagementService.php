@@ -9,33 +9,18 @@ use Illuminate\Support\Facades\File;
 
 class ImageManagementService
 {
-    /**
-     * Get the public uploads path.
-     * 
-     * Default folder for laravel public folder is public_path($foler).
-     * 
-     * @param string $folder
-     * @return string
-     */
     protected function publicUploadsPath($folder = '')
     {
         return '../public_html/' . $folder;
     }
 
-    /**
-     * Upload an image.
-     *
-     * @param UploadedFile $file
-     * @param array $options
-     * @return string|null
-     */
     public function uploadImage(UploadedFile $file, array $options = [])
     {
         $currentImagePath = $options['currentImagePath'] ?? null;
-        $disk = $options['disk'] ?? EnumFileSystemDisk::PUBLIC->value;
+        $disk = $options['disk'] ?? EnumFileSystemDisk::PUBLIC ->value;
         $folder = $options['folder'] ?? null;
 
-        if ($disk === EnumFileSystemDisk::PUBLIC->value) {
+        if ($disk === EnumFileSystemDisk::PUBLIC ->value) {
             if ($currentImagePath && Storage::disk('public')->exists($currentImagePath)) {
                 Storage::disk('public')->delete($currentImagePath);
             }
@@ -63,16 +48,9 @@ class ImageManagementService
         return null;
     }
 
-    /**
-     * Destroy an image.
-     *
-     * @param string $currentImagePath
-     * @param string $disk
-     * @return bool
-     */
-    public function destroyImage($currentImagePath, $disk = EnumFileSystemDisk::PUBLIC->value)
+    public function destroyImage($currentImagePath, $disk = EnumFileSystemDisk::PUBLIC ->value)
     {
-        if ($disk === EnumFileSystemDisk::PUBLIC->value) {
+        if ($disk === EnumFileSystemDisk::PUBLIC ->value) {
             if ($currentImagePath && Storage::disk('public')->exists($currentImagePath)) {
                 Storage::disk('public')->delete($currentImagePath);
                 return true;

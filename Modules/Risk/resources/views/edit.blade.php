@@ -6,8 +6,8 @@
             <div class="page-title">
                 <div class="row">
                     <div class="col-12 col-md-6 order-md-1 order-last">
-                        <h3>Risiko Baru</h3>
-                        <p class="text-subtitle text-muted">Buat entri risiko baru.</p>
+                        <h3>Edit Risk</h3>
+                        <p class="text-subtitle text-muted">Update the details of the risk.</p>
                     </div>
                 </div>
             </div>
@@ -19,15 +19,17 @@
                     <div class="card">
                         <div class="card-content">
                             <div class="card-body">
-                                <form method="POST" action="{{ route('risks.store') }}">
+                                <form method="POST" action="{{ route('risks.update', $risk->id) }}">
                                     @csrf
+                                    @method('PUT') <!-- Use PUT for updating -->
 
                                     <!-- Reporter Details -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="reporters_name">Nama Pelapor</label>
+                                        <label class="form-label" for="reporters_name">Reporter’s Name</label>
                                         <input type="text"
                                             class="form-control @error('reporters_name') is-invalid @enderror"
-                                            id="reporters_name" name="reporters_name" value="{{ old('reporters_name') }}">
+                                            id="reporters_name" name="reporters_name"
+                                            value="{{ old('reporters_name', $risk->reporters_name) }}">
                                         @error('reporters_name')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -36,11 +38,11 @@
                                     </div>
 
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="reporters_position">Posisi Pelapor</label>
+                                        <label class="form-label" for="reporters_position">Reporter’s Position</label>
                                         <input type="text"
                                             class="form-control @error('reporters_position') is-invalid @enderror"
                                             id="reporters_position" name="reporters_position"
-                                            value="{{ old('reporters_position') }}">
+                                            value="{{ old('reporters_position', $risk->reporters_position) }}">
                                         @error('reporters_position')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -49,9 +51,10 @@
                                     </div>
 
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="contact_no">Nomor Kontak</label>
+                                        <label class="form-label" for="contact_no">Contact No</label>
                                         <input type="text" class="form-control @error('contact_no') is-invalid @enderror"
-                                            id="contact_no" name="contact_no" value="{{ old('contact_no') }}">
+                                            id="contact_no" name="contact_no"
+                                            value="{{ old('contact_no', $risk->contact_no) }}">
                                         @error('contact_no')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -61,9 +64,10 @@
 
                                     <!-- Risk Details -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="risk_name">Nama Risiko</label>
+                                        <label class="form-label" for="risk_name">Risk Name</label>
                                         <input type="text" class="form-control @error('risk_name') is-invalid @enderror"
-                                            id="risk_name" name="risk_name" value="{{ old('risk_name') }}">
+                                            id="risk_name" name="risk_name"
+                                            value="{{ old('risk_name', $risk->risk_name) }}">
                                         @error('risk_name')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -72,9 +76,9 @@
                                     </div>
 
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="risk_description">Deskripsi Risiko</label>
+                                        <label class="form-label" for="risk_description">Risk Description</label>
                                         <textarea class="form-control @error('risk_description') is-invalid @enderror" id="risk_description"
-                                            name="risk_description">{{ old('risk_description') }}</textarea>
+                                            name="risk_description">{{ old('risk_description', $risk->risk_description) }}</textarea>
                                         @error('risk_description')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -84,19 +88,21 @@
 
                                     <!-- Status Fields -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="risk_status">Status Risiko</label>
-                                        <select class="form-select @error('risk_status') is-invalid @enderror"
+                                        <label class="form-label" for="risk_status">Risk Status</label>
+                                        <select class="form-control @error('risk_status') is-invalid @enderror"
                                             id="risk_status" name="risk_status">
                                             <option value="Provisional"
-                                                {{ old('risk_status') == 'Provisional' ? 'selected' : '' }}>
-                                                Sementara</option>
-                                            <option value="Open" {{ old('risk_status') == 'Open' ? 'selected' : '' }}>
-                                                Terbuka</option>
-                                            <option value="Closed" {{ old('risk_status') == 'Closed' ? 'selected' : '' }}>
-                                                Tertutup</option>
+                                                {{ old('risk_status', $risk->risk_status) == 'Provisional' ? 'selected' : '' }}>
+                                                Provisional</option>
+                                            <option value="Open"
+                                                {{ old('risk_status', $risk->risk_status) == 'Open' ? 'selected' : '' }}>
+                                                Open</option>
+                                            <option value="Closed"
+                                                {{ old('risk_status', $risk->risk_status) == 'Closed' ? 'selected' : '' }}>
+                                                Closed</option>
                                             <option value="Re-Opened"
-                                                {{ old('risk_status') == 'Re-Opened' ? 'selected' : '' }}>
-                                                Dibuka Kembali</option>
+                                                {{ old('risk_status', $risk->risk_status) == 'Re-Opened' ? 'selected' : '' }}>
+                                                Re-Opened</option>
                                         </select>
                                         @error('risk_status')
                                             <span class="invalid-feedback" role="alert">
@@ -106,10 +112,10 @@
                                     </div>
 
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="date_opened">Tanggal Dibuka</label>
+                                        <label class="form-label" for="date_opened">Date Opened</label>
                                         <input type="date"
                                             class="form-control @error('date_opened') is-invalid @enderror" id="date_opened"
-                                            name="date_opened" value="{{ old('date_opened') }}">
+                                            name="date_opened" value="{{ old('date_opened', $risk->date_opened) }}">
                                         @error('date_opened')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -118,12 +124,11 @@
                                     </div>
 
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="next_review_date">Tanggal Peninjauan
-                                            Berikutnya</label>
+                                        <label class="form-label" for="next_review_date">Next Review Date</label>
                                         <input type="date"
                                             class="form-control @error('next_review_date') is-invalid @enderror"
                                             id="next_review_date" name="next_review_date"
-                                            value="{{ old('next_review_date') }}">
+                                            value="{{ old('next_review_date', $risk->next_review_date) }}">
                                         @error('next_review_date')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -133,54 +138,54 @@
 
                                     <!-- Reminder Period -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="reminder_period">Periode Pengingat</label>
-                                        <select class="form-select @error('reminder_period') is-invalid @enderror"
+                                        <label class="form-label" for="reminder_period">Reminder Period</label>
+                                        <select class="form-control @error('reminder_period') is-invalid @enderror"
                                             id="reminder_period" name="reminder_period">
                                             <option value="Do Not Send Reminder"
-                                                {{ old('reminder_period') == 'Do Not Send Reminder' ? 'selected' : '' }}>
-                                                Jangan Kirim Pengingat</option>
+                                                {{ old('reminder_period', $risk->reminder_period) == 'Do Not Send Reminder' ? 'selected' : '' }}>
+                                                Do Not Send Reminder</option>
                                             <option value="On The Due Date"
-                                                {{ old('reminder_period') == 'On The Due Date' ? 'selected' : '' }}>
-                                                Pada Tanggal Jatuh Tempo</option>
+                                                {{ old('reminder_period', $risk->reminder_period) == 'On The Due Date' ? 'selected' : '' }}>
+                                                On The Due Date</option>
                                             <option value="1 day before the Due Date"
-                                                {{ old('reminder_period') == '1 day before the Due Date' ? 'selected' : '' }}>
-                                                1 hari sebelum Jatuh Tempo</option>
+                                                {{ old('reminder_period', $risk->reminder_period) == '1 day before the Due Date' ? 'selected' : '' }}>
+                                                1 day before the Due Date</option>
                                             <option value="2 days before the Due Date"
-                                                {{ old('reminder_period') == '2 days before the Due Date' ? 'selected' : '' }}>
-                                                2 hari sebelum Jatuh Tempo</option>
+                                                {{ old('reminder_period', $risk->reminder_period) == '2 days before the Due Date' ? 'selected' : '' }}>
+                                                2 days before the Due Date</option>
                                             <option value="3 days before the Due Date"
-                                                {{ old('reminder_period') == '3 days before the Due Date' ? 'selected' : '' }}>
-                                                3 hari sebelum Jatuh Tempo</option>
+                                                {{ old('reminder_period', $risk->reminder_period) == '3 days before the Due Date' ? 'selected' : '' }}>
+                                                3 days before the Due Date</option>
                                             <option value="4 days before the Due Date"
-                                                {{ old('reminder_period') == '4 days before the Due Date' ? 'selected' : '' }}>
-                                                4 hari sebelum Jatuh Tempo</option>
+                                                {{ old('reminder_period', $risk->reminder_period) == '4 days before the Due Date' ? 'selected' : '' }}>
+                                                4 days before the Due Date</option>
                                             <option value="5 days before the Due Date"
-                                                {{ old('reminder_period') == '5 days before the Due Date' ? 'selected' : '' }}>
-                                                5 hari sebelum Jatuh Tempo</option>
+                                                {{ old('reminder_period', $risk->reminder_period) == '5 days before the Due Date' ? 'selected' : '' }}>
+                                                5 days before the Due Date</option>
                                             <option value="6 days before the Due Date"
-                                                {{ old('reminder_period') == '6 days before the Due Date' ? 'selected' : '' }}>
-                                                6 hari sebelum Jatuh Tempo</option>
+                                                {{ old('reminder_period', $risk->reminder_period) == '6 days before the Due Date' ? 'selected' : '' }}>
+                                                6 days before the Due Date</option>
                                             <option value="1 week before the Due Date"
-                                                {{ old('reminder_period') == '1 week before the Due Date' ? 'selected' : '' }}>
-                                                1 minggu sebelum Jatuh Tempo</option>
+                                                {{ old('reminder_period', $risk->reminder_period) == '1 week before the Due Date' ? 'selected' : '' }}>
+                                                1 week before the Due Date</option>
                                             <option value="2 weeks before the Due Date"
-                                                {{ old('reminder_period') == '2 weeks before the Due Date' ? 'selected' : '' }}>
-                                                2 minggu sebelum Jatuh Tempo</option>
+                                                {{ old('reminder_period', $risk->reminder_period) == '2 weeks before the Due Date' ? 'selected' : '' }}>
+                                                2 weeks before the Due Date</option>
                                             <option value="1 Month (30 Days) before the Due Date"
-                                                {{ old('reminder_period') == '1 Month (30 Days) before the Due Date' ? 'selected' : '' }}>
-                                                1 Bulan (30 Hari) sebelum Jatuh Tempo</option>
+                                                {{ old('reminder_period', $risk->reminder_period) == '1 Month (30 Days) before the Due Date' ? 'selected' : '' }}>
+                                                1 Month (30 Days) before the Due Date</option>
                                             <option value="2 Months (60 Days) before the Due Date"
-                                                {{ old('reminder_period') == '2 Months (60 Days) before the Due Date' ? 'selected' : '' }}>
-                                                2 Bulan (60 Hari) sebelum Jatuh Tempo</option>
+                                                {{ old('reminder_period', $risk->reminder_period) == '2 Months (60 Days) before the Due Date' ? 'selected' : '' }}>
+                                                2 Months (60 Days) before the Due Date</option>
                                             <option value="3 Months (90 Days) before the Due Date"
-                                                {{ old('reminder_period') == '3 Months (90 Days) before the Due Date' ? 'selected' : '' }}>
-                                                3 Bulan (90 Hari) sebelum Jatuh Tempo</option>
+                                                {{ old('reminder_period', $risk->reminder_period) == '3 Months (90 Days) before the Due Date' ? 'selected' : '' }}>
+                                                3 Months (90 Days) before the Due Date</option>
                                             <option value="6 Months (180 Days) before the Due Date"
-                                                {{ old('reminder_period') == '6 Months (180 Days) before the Due Date' ? 'selected' : '' }}>
-                                                6 Bulan (180 Hari) sebelum Jatuh Tempo</option>
+                                                {{ old('reminder_period', $risk->reminder_period) == '6 Months (180 Days) before the Due Date' ? 'selected' : '' }}>
+                                                6 Months (180 Days) before the Due Date</option>
                                             <option value="1 Year (365 Days) before the Due Date"
-                                                {{ old('reminder_period') == '1 Year (365 Days) before the Due Date' ? 'selected' : '' }}>
-                                                1 Tahun (365 Hari) sebelum Jatuh Tempo</option>
+                                                {{ old('reminder_period', $risk->reminder_period) == '1 Year (365 Days) before the Due Date' ? 'selected' : '' }}>
+                                                1 Year (365 Days) before the Due Date</option>
                                         </select>
                                         @error('reminder_period')
                                             <span class="invalid-feedback" role="alert">
@@ -191,10 +196,11 @@
 
                                     <!-- Reminder Date -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="reminder_date">Tanggal Pengingat</label>
+                                        <label class="form-label" for="reminder_date">Reminder Date</label>
                                         <input type="date"
                                             class="form-control @error('reminder_date') is-invalid @enderror"
-                                            id="reminder_date" name="reminder_date" value="{{ old('reminder_date') }}">
+                                            id="reminder_date" name="reminder_date"
+                                            value="{{ old('reminder_date', $risk->reminder_date) }}">
                                         @error('reminder_date')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -202,22 +208,23 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Risk Type -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="type_of_risk">Jenis Risiko</label>
-                                        <select class="form-select @error('type_of_risk') is-invalid @enderror"
+                                        <label class="form-label" for="type_of_risk">Risk Type</label>
+                                        <select class="form-control @error('type_of_risk') is-invalid @enderror"
                                             id="type_of_risk" name="type_of_risk">
                                             <option value="Corporate Risk"
-                                                {{ old('type_of_risk') == 'Corporate Risk' ? 'selected' : '' }}>
-                                                Risiko Korporat</option>
+                                                {{ old('type_of_risk', $risk->type_of_risk) == 'Corporate Risk' ? 'selected' : '' }}>
+                                                Corporate Risk</option>
                                             <option value="Hospital Risk"
-                                                {{ old('type_of_risk') == 'Hospital Risk' ? 'selected' : '' }}>
-                                                Risiko Rumah Sakit</option>
+                                                {{ old('type_of_risk', $risk->type_of_risk) == 'Hospital Risk' ? 'selected' : '' }}>
+                                                Hospital Risk</option>
                                             <option value="Project Risk"
-                                                {{ old('type_of_risk') == 'Project Risk' ? 'selected' : '' }}>
-                                                Risiko Proyek</option>
+                                                {{ old('type_of_risk', $risk->type_of_risk) == 'Project Risk' ? 'selected' : '' }}>
+                                                Project Risk</option>
                                             <option value="Emerging Risk"
-                                                {{ old('type_of_risk') == 'Emerging Risk' ? 'selected' : '' }}>
-                                                Risiko yang Muncul</option>
+                                                {{ old('type_of_risk', $risk->type_of_risk) == 'Emerging Risk' ? 'selected' : '' }}>
+                                                Emerging Risk</option>
                                         </select>
                                         @error('type_of_risk')
                                             <span class="invalid-feedback" role="alert">
@@ -226,25 +233,26 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Category -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="category">Kategori</label>
-                                        <select class="form-select @error('category') is-invalid @enderror"
+                                        <label class="form-label" for="category">Category</label>
+                                        <select class="form-control @error('category') is-invalid @enderror"
                                             id="category" name="category">
                                             <option value="Business Process and System"
-                                                {{ old('category') == 'Business Process and System' ? 'selected' : '' }}>
-                                                Proses Bisnis dan Sistem</option>
+                                                {{ old('category', $risk->category) == 'Business Process and System' ? 'selected' : '' }}>
+                                                Business Process and System</option>
                                             <option value="Consumer Quality and Safety and Environment"
-                                                {{ old('category') == 'Consumer Quality and Safety and Environment' ? 'selected' : '' }}>
-                                                Kualitas Konsumen dan Keselamatan dan Lingkungan</option>
+                                                {{ old('category', $risk->category) == 'Consumer Quality and Safety and Environment' ? 'selected' : '' }}>
+                                                Consumer Quality and Safety and Environment</option>
                                             <option value="Health and Safety"
-                                                {{ old('category') == 'Health and Safety' ? 'selected' : '' }}>
-                                                Kesehatan dan Keselamatan</option>
+                                                {{ old('category', $risk->category) == 'Health and Safety' ? 'selected' : '' }}>
+                                                Health and Safety</option>
                                             <option value="Reputation and Mission"
-                                                {{ old('category') == 'Reputation and Mission' ? 'selected' : '' }}>
-                                                Reputasi dan Misi</option>
+                                                {{ old('category', $risk->category) == 'Reputation and Mission' ? 'selected' : '' }}>
+                                                Reputation and Mission</option>
                                             <option value="Service Delivery"
-                                                {{ old('category') == 'Service Delivery' ? 'selected' : '' }}>
-                                                Pelayanan</option>
+                                                {{ old('category', $risk->category) == 'Service Delivery' ? 'selected' : '' }}>
+                                                Service Delivery</option>
                                         </select>
                                         @error('category')
                                             <span class="invalid-feedback" role="alert">
@@ -253,11 +261,12 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Location -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="location">Lokasi</label>
+                                        <label class="form-label" for="location">Location</label>
                                         <input type="text"
                                             class="form-control @error('location') is-invalid @enderror" id="location"
-                                            name="location" value="{{ old('location') }}">
+                                            name="location" value="{{ old('location', $risk->location) }}">
                                         @error('location')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -265,10 +274,11 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Unit -->
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="unit">Unit</label>
                                         <input type="text" class="form-control @error('unit') is-invalid @enderror"
-                                            id="unit" name="unit" value="{{ old('unit') }}">
+                                            id="unit" name="unit" value="{{ old('unit', $risk->unit) }}">
                                         @error('unit')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -276,66 +286,74 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Relevant Committee -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="relevant_committee">Komite Terkait</label>
-                                        <select class="form-select @error('relevant_committee') is-invalid @enderror"
+                                        <label class="form-label" for="relevant_committee">Relevant Committee</label>
+                                        <select class="form-control @error('relevant_committee') is-invalid @enderror"
                                             id="relevant_committee" name="relevant_committee">
                                             <option value="Antimicroba Resistency Control"
-                                                {{ old('relevant_committee') == 'Antimicroba Resistency Control' ? 'selected' : '' }}>
-                                                Kontrol Resistensi Antimikroba</option>
+                                                {{ old('relevant_committee', $risk->relevant_committee) == 'Antimicroba Resistency Control' ? 'selected' : '' }}>
+                                                Antimicroba Resistency Control</option>
                                             <option value="Ethics"
-                                                {{ old('relevant_committee') == 'Ethics' ? 'selected' : '' }}>Etika
+                                                {{ old('relevant_committee', $risk->relevant_committee) == 'Ethics' ? 'selected' : '' }}>
+                                                Ethics
                                             </option>
                                             <option value="Health Promotion"
-                                                {{ old('relevant_committee') == 'Health Promotion' ? 'selected' : '' }}>
-                                                Promosi Kesehatan</option>
+                                                {{ old('relevant_committee', $risk->relevant_committee) == 'Health Promotion' ? 'selected' : '' }}>
+                                                Health Promotion</option>
                                             <option value="Infection Control"
-                                                {{ old('relevant_committee') == 'Infection Control' ? 'selected' : '' }}>
-                                                Kontrol Infeksi</option>
+                                                {{ old('relevant_committee', $risk->relevant_committee) == 'Infection Control' ? 'selected' : '' }}>
+                                                Infection Control</option>
                                             <option value="MDGs"
-                                                {{ old('relevant_committee') == 'MDGs' ? 'selected' : '' }}>MDGs</option>
+                                                {{ old('relevant_committee', $risk->relevant_committee) == 'MDGs' ? 'selected' : '' }}>
+                                                MDGs</option>
                                             <option value="Medical"
-                                                {{ old('relevant_committee') == 'Medical' ? 'selected' : '' }}>Medis
+                                                {{ old('relevant_committee', $risk->relevant_committee) == 'Medical' ? 'selected' : '' }}>
+                                                Medical
                                             </option>
                                             <option value="Medical Record"
-                                                {{ old('relevant_committee') == 'Medical Record' ? 'selected' : '' }}>
-                                                Rekam Medis</option>
+                                                {{ old('relevant_committee', $risk->relevant_committee) == 'Medical Record' ? 'selected' : '' }}>
+                                                Medical Record</option>
                                             <option value="Medical Record Extermination"
-                                                {{ old('relevant_committee') == 'Medical Record Extermination' ? 'selected' : '' }}>
-                                                Pemusnahan Rekam Medis</option>
+                                                {{ old('relevant_committee', $risk->relevant_committee) == 'Medical Record Extermination' ? 'selected' : '' }}>
+                                                Medical Record Extermination</option>
                                             <option value="Medical - Ethico Legal"
-                                                {{ old('relevant_committee') == 'Medical - Ethico Legal' ? 'selected' : '' }}>
-                                                Medis - Etika Legal</option>
+                                                {{ old('relevant_committee', $risk->relevant_committee) == 'Medical - Ethico Legal' ? 'selected' : '' }}>
+                                                Medical - Ethico Legal</option>
                                             <option value="Nursing"
-                                                {{ old('relevant_committee') == 'Nursing' ? 'selected' : '' }}>Keperawatan
+                                                {{ old('relevant_committee', $risk->relevant_committee) == 'Nursing' ? 'selected' : '' }}>
+                                                Nursing
                                             </option>
                                             <option value="Occupational Health and Safety"
-                                                {{ old('relevant_committee') == 'Occupational Health and Safety' ? 'selected' : '' }}>
-                                                Kesehatan dan Keselamatan Kerja</option>
+                                                {{ old('relevant_committee', $risk->relevant_committee) == 'Occupational Health and Safety' ? 'selected' : '' }}>
+                                                Occupational Health and Safety</option>
                                             <option value="Pain Management"
-                                                {{ old('relevant_committee') == 'Pain Management' ? 'selected' : '' }}>
-                                                Manajemen Nyeri
-                                            </option>
+                                                {{ old('relevant_committee', $risk->relevant_committee) == 'Pain Management' ? 'selected' : '' }}>
+                                                Pain
+                                                Management</option>
                                             <option value="Patient Safety"
-                                                {{ old('relevant_committee') == 'Patient Safety' ? 'selected' : '' }}>
-                                                Keselamatan Pasien</option>
+                                                {{ old('relevant_committee', $risk->relevant_committee) == 'Patient Safety' ? 'selected' : '' }}>
+                                                Patient Safety</option>
                                             <option value="Pharmacy and Therapatical"
-                                                {{ old('relevant_committee') == 'Pharmacy and Therapatical' ? 'selected' : '' }}>
-                                                Farmasi dan Terapi</option>
+                                                {{ old('relevant_committee', $risk->relevant_committee) == 'Pharmacy and Therapatical' ? 'selected' : '' }}>
+                                                Pharmacy and Therapatical</option>
                                             <option value="PONEK"
-                                                {{ old('relevant_committee') == 'PONEK' ? 'selected' : '' }}>PONEK</option>
+                                                {{ old('relevant_committee', $risk->relevant_committee) == 'PONEK' ? 'selected' : '' }}>
+                                                PONEK</option>
                                             <option value="Quality"
-                                                {{ old('relevant_committee') == 'Quality' ? 'selected' : '' }}>Mutu
+                                                {{ old('relevant_committee', $risk->relevant_committee) == 'Quality' ? 'selected' : '' }}>
+                                                Quality
                                             </option>
                                             <option value="Quality and Patient Safety"
-                                                {{ old('relevant_committee') == 'Quality and Patient Safety' ? 'selected' : '' }}>
-                                                Mutu dan Keselamatan Pasien</option>
+                                                {{ old('relevant_committee', $risk->relevant_committee) == 'Quality and Patient Safety' ? 'selected' : '' }}>
+                                                Quality and Patient Safety</option>
                                             <option value="TB Dots"
-                                                {{ old('relevant_committee') == 'TB Dots' ? 'selected' : '' }}>TB Dots
+                                                {{ old('relevant_committee', $risk->relevant_committee) == 'TB Dots' ? 'selected' : '' }}>
+                                                TB Dots
                                             </option>
                                             <option value="Nil"
-                                                {{ old('relevant_committee') == 'Nil' ? 'selected' : '' }}>Tidak Ada
-                                            </option>
+                                                {{ old('relevant_committee', $risk->relevant_committee) == 'Nil' ? 'selected' : '' }}>
+                                                Nil</option>
                                         </select>
                                         @error('relevant_committee')
                                             <span class="invalid-feedback" role="alert">
@@ -343,13 +361,14 @@
                                             </span>
                                         @enderror
                                     </div>
+
+                                    <!-- Accountable Manager -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="accountable_manager">Manajer Penanggung
-                                            Jawab</label>
+                                        <label class="form-label" for="accountable_manager">Accountable Manager</label>
                                         <input type="text"
                                             class="form-control @error('accountable_manager') is-invalid @enderror"
                                             id="accountable_manager" name="accountable_manager"
-                                            value="{{ old('accountable_manager') }}">
+                                            value="{{ old('accountable_manager', $risk->accountable_manager) }}">
                                         @error('accountable_manager')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -357,13 +376,14 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Responsible Supervisor -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="responsible_supervisor">Supervisor
-                                            Penanggung Jawab</label>
+                                        <label class="form-label" for="responsible_supervisor">Responsible
+                                            Supervisor</label>
                                         <input type="text"
                                             class="form-control @error('responsible_supervisor') is-invalid @enderror"
                                             id="responsible_supervisor" name="responsible_supervisor"
-                                            value="{{ old('responsible_supervisor') }}">
+                                            value="{{ old('responsible_supervisor', $risk->responsible_supervisor) }}">
                                         @error('responsible_supervisor')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -371,18 +391,19 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Notify of Associated Incidents -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="notify_of_associated_incidents">Beritahukan Insiden
-                                            Terkait</label>
+                                        <label class="form-label" for="notify_of_associated_incidents">Notify of
+                                            Associated Incidents</label>
                                         <select
-                                            class="form-select @error('notify_of_associated_incidents') is-invalid @enderror"
+                                            class="form-control @error('notify_of_associated_incidents') is-invalid @enderror"
                                             id="notify_of_associated_incidents" name="notify_of_associated_incidents">
                                             <option value="Yes"
-                                                {{ old('notify_of_associated_incidents') == 'Yes' ? 'selected' : '' }}>Ya
-                                            </option>
+                                                {{ old('notify_of_associated_incidents', $risk->notify_of_associated_incidents) == 'Yes' ? 'selected' : '' }}>
+                                                Yes</option>
                                             <option value="No"
-                                                {{ old('notify_of_associated_incidents') == 'No' ? 'selected' : '' }}>Tidak
-                                            </option>
+                                                {{ old('notify_of_associated_incidents', $risk->notify_of_associated_incidents) == 'No' ? 'selected' : '' }}>
+                                                No</option>
                                         </select>
                                         @error('notify_of_associated_incidents')
                                             <span class="invalid-feedback" role="alert">
@@ -391,9 +412,10 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Causes -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="causes">Penyebab</label>
-                                        <textarea class="form-control @error('causes') is-invalid @enderror" id="causes" name="causes">{{ old('causes') }}</textarea>
+                                        <label class="form-label" for="causes">Causes</label>
+                                        <textarea class="form-control @error('causes') is-invalid @enderror" id="causes" name="causes">{{ old('causes', $risk->causes) }}</textarea>
                                         @error('causes')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -401,9 +423,10 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Consequences -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="consequences">Konsekuensi</label>
-                                        <textarea class="form-control @error('consequences') is-invalid @enderror" id="consequences" name="consequences">{{ old('consequences') }}</textarea>
+                                        <label class="form-label" for="consequences">Consequences</label>
+                                        <textarea class="form-control @error('consequences') is-invalid @enderror" id="consequences" name="consequences">{{ old('consequences', $risk->consequences) }}</textarea>
                                         @error('consequences')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -411,9 +434,10 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Controls -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="controls">Kontrol</label>
-                                        <textarea class="form-control @error('controls') is-invalid @enderror" id="controls" name="controls">{{ old('controls') }}</textarea>
+                                        <label class="form-label" for="controls">Controls</label>
+                                        <textarea class="form-control @error('controls') is-invalid @enderror" id="controls" name="controls">{{ old('controls', $risk->controls) }}</textarea>
                                         @error('controls')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -421,20 +445,26 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Control Level -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="control">Tingkat Kontrol</label>
-                                        <select class="form-select @error('control') is-invalid @enderror" id="control"
-                                            name="control">
-                                            <option value="Minimal" {{ old('control') == 'Minimal' ? 'selected' : '' }}>
-                                                Minimal</option>
-                                            <option value="Minor" {{ old('control') == 'Minor' ? 'selected' : '' }}>Minor
+                                        <label class="form-label" for="control">Control Level</label>
+                                        <select class="form-control @error('control') is-invalid @enderror"
+                                            id="control" name="control">
+                                            <option value="Minimal"
+                                                {{ old('control', $risk->control) == 'Minimal' ? 'selected' : '' }}>Minimal
                                             </option>
-                                            <option value="Moderate" {{ old('control') == 'Moderate' ? 'selected' : '' }}>
-                                                Moderat</option>
-                                            <option value="Major" {{ old('control') == 'Major' ? 'selected' : '' }}>Mayor
+                                            <option value="Minor"
+                                                {{ old('control', $risk->control) == 'Minor' ? 'selected' : '' }}>Minor
                                             </option>
-                                            <option value="Serious" {{ old('control') == 'Serious' ? 'selected' : '' }}>
-                                                Serius</option>
+                                            <option value="Moderate"
+                                                {{ old('control', $risk->control) == 'Moderate' ? 'selected' : '' }}>
+                                                Moderate</option>
+                                            <option value="Major"
+                                                {{ old('control', $risk->control) == 'Major' ? 'selected' : '' }}>Major
+                                            </option>
+                                            <option value="Serious"
+                                                {{ old('control', $risk->control) == 'Serious' ? 'selected' : '' }}>Serious
+                                            </option>
                                         </select>
                                         @error('control')
                                             <span class="invalid-feedback" role="alert">
@@ -443,43 +473,44 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Control Hierarchy -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="control_hierarchy">Hierarki Kontrol</label>
-                                        <select class="form-select @error('control_hierarchy') is-invalid @enderror"
+                                        <label class="form-label" for="control_hierarchy">Control Hierarchy</label>
+                                        <select class="form-control @error('control_hierarchy') is-invalid @enderror"
                                             id="control_hierarchy" name="control_hierarchy">
                                             <option value="Risk Avoidance"
-                                                {{ old('control_hierarchy') == 'Risk Avoidance' ? 'selected' : '' }}>
-                                                Penghindaran Risiko</option>
+                                                {{ old('control_hierarchy', $risk->control_hierarchy) == 'Risk Avoidance' ? 'selected' : '' }}>
+                                                Risk Avoidance</option>
                                             <option value="Risk Acceptance"
-                                                {{ old('control_hierarchy') == 'Risk Acceptance' ? 'selected' : '' }}>
-                                                Penerimaan Risiko</option>
+                                                {{ old('control_hierarchy', $risk->control_hierarchy) == 'Risk Acceptance' ? 'selected' : '' }}>
+                                                Risk Acceptance</option>
                                             <option value="Reduction of Likelihood of Occurrence"
-                                                {{ old('control_hierarchy') == 'Reduction of Likelihood of Occurrence' ? 'selected' : '' }}>
-                                                Pengurangan Kemungkinan Kejadian</option>
+                                                {{ old('control_hierarchy', $risk->control_hierarchy) == 'Reduction of Likelihood of Occurrence' ? 'selected' : '' }}>
+                                                Reduction of Likelihood of Occurrence</option>
                                             <option value="Reduction of Consequence"
-                                                {{ old('control_hierarchy') == 'Reduction of Consequence' ? 'selected' : '' }}>
-                                                Pengurangan Konsekuensi</option>
+                                                {{ old('control_hierarchy', $risk->control_hierarchy) == 'Reduction of Consequence' ? 'selected' : '' }}>
+                                                Reduction of Consequence</option>
                                             <option value="Transference of Risks"
-                                                {{ old('control_hierarchy') == 'Transference of Risks' ? 'selected' : '' }}>
-                                                Pengalihan Risiko</option>
+                                                {{ old('control_hierarchy', $risk->control_hierarchy) == 'Transference of Risks' ? 'selected' : '' }}>
+                                                Transference of Risks</option>
                                             <option value="Elimination"
-                                                {{ old('control_hierarchy') == 'Elimination' ? 'selected' : '' }}>
-                                                Eliminasi</option>
+                                                {{ old('control_hierarchy', $risk->control_hierarchy) == 'Elimination' ? 'selected' : '' }}>
+                                                Elimination</option>
                                             <option value="Substitution"
-                                                {{ old('control_hierarchy') == 'Substitution' ? 'selected' : '' }}>
-                                                Substitusi</option>
+                                                {{ old('control_hierarchy', $risk->control_hierarchy) == 'Substitution' ? 'selected' : '' }}>
+                                                Substitution</option>
                                             <option value="Isolation"
-                                                {{ old('control_hierarchy') == 'Isolation' ? 'selected' : '' }}>
-                                                Isolasi</option>
+                                                {{ old('control_hierarchy', $risk->control_hierarchy) == 'Isolation' ? 'selected' : '' }}>
+                                                Isolation</option>
                                             <option value="Engineering"
-                                                {{ old('control_hierarchy') == 'Engineering' ? 'selected' : '' }}>
-                                                Rekayasa</option>
+                                                {{ old('control_hierarchy', $risk->control_hierarchy) == 'Engineering' ? 'selected' : '' }}>
+                                                Engineering</option>
                                             <option value="Administrative"
-                                                {{ old('control_hierarchy') == 'Administrative' ? 'selected' : '' }}>
-                                                Administratif</option>
+                                                {{ old('control_hierarchy', $risk->control_hierarchy) == 'Administrative' ? 'selected' : '' }}>
+                                                Administrative</option>
                                             <option value="Personal Protective Equipment"
-                                                {{ old('control_hierarchy') == 'Personal Protective Equipment' ? 'selected' : '' }}>
-                                                Alat Pelindung Diri</option>
+                                                {{ old('control_hierarchy', $risk->control_hierarchy) == 'Personal Protective Equipment' ? 'selected' : '' }}>
+                                                Personal Protective Equipment</option>
                                         </select>
                                         @error('control_hierarchy')
                                             <span class="invalid-feedback" role="alert">
@@ -488,13 +519,13 @@
                                         @enderror
                                     </div>
 
-
-
+                                    <!-- Control Cost -->
                                     <div class="form-group mb-3">
-                                        <label class="form-label" for="control_cost">Biaya Kontrol</label>
+                                        <label class="form-label" for="control_cost">Control Cost</label>
                                         <input type="text"
                                             class="form-control @error('control_cost') is-invalid @enderror"
-                                            id="control_cost" name="control_cost" value="{{ old('control_cost') }}">
+                                            id="control_cost" name="control_cost"
+                                            value="{{ old('control_cost', $risk->control_cost) }}">
                                         @error('control_cost')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -502,13 +533,13 @@
                                         @enderror
                                     </div>
 
-
+                                    <!-- Effective Date -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="effective_date">Tanggal Efektif</label>
+                                        <label class="form-label" for="effective_date">Effective Date</label>
                                         <input type="date"
                                             class="form-control @error('effective_date') is-invalid @enderror"
                                             id="effective_date" name="effective_date"
-                                            value="{{ old('effective_date') }}">
+                                            value="{{ old('effective_date', $risk->effective_date) }}">
                                         @error('effective_date')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -516,12 +547,13 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Last Reviewed By -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="last_reviewed_by">Terakhir Ditinjau Oleh</label>
+                                        <label class="form-label" for="last_reviewed_by">Last Reviewed By</label>
                                         <input type="text"
                                             class="form-control @error('last_reviewed_by') is-invalid @enderror"
                                             id="last_reviewed_by" name="last_reviewed_by"
-                                            value="{{ old('last_reviewed_by') }}">
+                                            value="{{ old('last_reviewed_by', $risk->last_reviewed_by) }}">
                                         @error('last_reviewed_by')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -529,12 +561,13 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Last Reviewed On -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="last_reviewed_on">Terakhir Ditinjau Pada</label>
+                                        <label class="form-label" for="last_reviewed_on">Last Reviewed On</label>
                                         <input type="date"
                                             class="form-control @error('last_reviewed_on') is-invalid @enderror"
                                             id="last_reviewed_on" name="last_reviewed_on"
-                                            value="{{ old('last_reviewed_on') }}">
+                                            value="{{ old('last_reviewed_on', $risk->last_reviewed_on) }}">
                                         @error('last_reviewed_on')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -542,28 +575,29 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Assessment -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="assessment">Penilaian</label>
-                                        <select class="form-select @error('assessment') is-invalid @enderror"
+                                        <label class="form-label" for="assessment">Assessment</label>
+                                        <select class="form-control @error('assessment') is-invalid @enderror"
                                             id="assessment" name="assessment">
                                             <option value="Review Pending"
-                                                {{ old('assessment') == 'Review Pending' ? 'selected' : '' }}>
-                                                Menunggu Peninjauan</option>
+                                                {{ old('assessment', $risk->assessment) == 'Review Pending' ? 'selected' : '' }}>
+                                                Review Pending</option>
                                             <option value="Review Underway"
-                                                {{ old('assessment') == 'Review Underway' ? 'selected' : '' }}>
-                                                Peninjauan Sedang Berlangsung</option>
+                                                {{ old('assessment', $risk->assessment) == 'Review Underway' ? 'selected' : '' }}>
+                                                Review Underway</option>
                                             <option value="Ineffective"
-                                                {{ old('assessment') == 'Ineffective' ? 'selected' : '' }}>Tidak Efektif
-                                            </option>
+                                                {{ old('assessment', $risk->assessment) == 'Ineffective' ? 'selected' : '' }}>
+                                                Ineffective</option>
                                             <option value="Partial Effectiveness Only"
-                                                {{ old('assessment') == 'Partial Effectiveness Only' ? 'selected' : '' }}>
-                                                Hanya Efektif Sebagian</option>
+                                                {{ old('assessment', $risk->assessment) == 'Partial Effectiveness Only' ? 'selected' : '' }}>
+                                                Partial Effectiveness Only</option>
                                             <option value="Effective but should be improved"
-                                                {{ old('assessment') == 'Effective but should be improved' ? 'selected' : '' }}>
-                                                Efektif tetapi perlu ditingkatkan</option>
+                                                {{ old('assessment', $risk->assessment) == 'Effective but should be improved' ? 'selected' : '' }}>
+                                                Effective but should be improved</option>
                                             <option value="Effective - No Change Required"
-                                                {{ old('assessment') == 'Effective - No Change Required' ? 'selected' : '' }}>
-                                                Efektif - Tidak Perlu Perubahan</option>
+                                                {{ old('assessment', $risk->assessment) == 'Effective - No Change Required' ? 'selected' : '' }}>
+                                                Effective - No Change Required</option>
                                         </select>
                                         @error('assessment')
                                             <span class="invalid-feedback" role="alert">
@@ -572,24 +606,25 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Overall Control Assessment -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="overall_control_assessment">Penilaian Kontrol
-                                            Keseluruhan</label>
+                                        <label class="form-label" for="overall_control_assessment">Overall Control
+                                            Assessment</label>
                                         <select
-                                            class="form-select @error('overall_control_assessment') is-invalid @enderror"
+                                            class="form-control @error('overall_control_assessment') is-invalid @enderror"
                                             id="overall_control_assessment" name="overall_control_assessment">
                                             <option value="Excellent"
-                                                {{ old('overall_control_assessment') == 'Excellent' ? 'selected' : '' }}>
-                                                Sangat Baik</option>
+                                                {{ old('overall_control_assessment', $risk->overall_control_assessment) == 'Excellent' ? 'selected' : '' }}>
+                                                Excellent</option>
                                             <option value="Good"
-                                                {{ old('overall_control_assessment') == 'Good' ? 'selected' : '' }}>Baik
-                                            </option>
+                                                {{ old('overall_control_assessment', $risk->overall_control_assessment) == 'Good' ? 'selected' : '' }}>
+                                                Good</option>
                                             <option value="Moderate"
-                                                {{ old('overall_control_assessment') == 'Moderate' ? 'selected' : '' }}>
-                                                Sedang</option>
+                                                {{ old('overall_control_assessment', $risk->overall_control_assessment) == 'Moderate' ? 'selected' : '' }}>
+                                                Moderate</option>
                                             <option value="Poor"
-                                                {{ old('overall_control_assessment') == 'Poor' ? 'selected' : '' }}>Buruk
-                                            </option>
+                                                {{ old('overall_control_assessment', $risk->overall_control_assessment) == 'Poor' ? 'selected' : '' }}>
+                                                Poor</option>
                                         </select>
                                         @error('overall_control_assessment')
                                             <span class="invalid-feedback" role="alert">
@@ -598,12 +633,14 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Residual Consequences -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="residual_consequences">Konsekuensi Residual</label>
+                                        <label class="form-label" for="residual_consequences">Residual
+                                            Consequences</label>
                                         <input type="text"
                                             class="form-control @error('residual_consequences') is-invalid @enderror"
                                             id="residual_consequences" name="residual_consequences"
-                                            value="{{ old('residual_consequences') }}">
+                                            value="{{ old('residual_consequences', $risk->residual_consequences) }}">
                                         @error('residual_consequences')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -611,27 +648,26 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Residual Likelihood -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="residual_likelihood">Kemungkinan Residual</label>
-                                        <select class="form-select @error('residual_likelihood') is-invalid @enderror"
+                                        <label class="form-label" for="residual_likelihood">Residual Likelihood</label>
+                                        <select class="form-control @error('residual_likelihood') is-invalid @enderror"
                                             id="residual_likelihood" name="residual_likelihood">
                                             <option value="Frequent"
-                                                {{ old('residual_likelihood') == 'Frequent' ? 'selected' : '' }}>Sering
-                                            </option>
+                                                {{ old('residual_likelihood', $risk->residual_likelihood) == 'Frequent' ? 'selected' : '' }}>
+                                                Frequent</option>
                                             <option value="Likely"
-                                                {{ old('residual_likelihood') == 'Likely' ? 'selected' : '' }}>Mungkin
-                                            </option>
+                                                {{ old('residual_likelihood', $risk->residual_likelihood) == 'Likely' ? 'selected' : '' }}>
+                                                Likely</option>
                                             <option value="Possible"
-                                                {{ old('residual_likelihood') == 'Possible' ? 'selected' : '' }}>Mungkin
-                                                Terjadi
-                                            </option>
+                                                {{ old('residual_likelihood', $risk->residual_likelihood) == 'Possible' ? 'selected' : '' }}>
+                                                Possible</option>
                                             <option value="Unlikely"
-                                                {{ old('residual_likelihood') == 'Unlikely' ? 'selected' : '' }}>Tidak
-                                                Mungkin
-                                            </option>
+                                                {{ old('residual_likelihood', $risk->residual_likelihood) == 'Unlikely' ? 'selected' : '' }}>
+                                                Unlikely</option>
                                             <option value="Rare"
-                                                {{ old('residual_likelihood') == 'Rare' ? 'selected' : '' }}>Jarang
-                                            </option>
+                                                {{ old('residual_likelihood', $risk->residual_likelihood) == 'Rare' ? 'selected' : '' }}>
+                                                Rare</option>
                                         </select>
                                         @error('residual_likelihood')
                                             <span class="invalid-feedback" role="alert">
@@ -640,12 +676,13 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Residual Score -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="residual_score">Skor Residual</label>
+                                        <label class="form-label" for="residual_score">Residual Score</label>
                                         <input type="text"
                                             class="form-control @error('residual_score') is-invalid @enderror"
                                             id="residual_score" name="residual_score"
-                                            value="{{ old('residual_score') }}">
+                                            value="{{ old('residual_score', $risk->residual_score) }}">
                                         @error('residual_score')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -653,9 +690,10 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Residual Risk -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="residual_risk">Risiko Residual</label>
-                                        <textarea class="form-control @error('residual_risk') is-invalid @enderror" id="residual_risk" name="residual_risk">{{ old('residual_risk') }}</textarea>
+                                        <label class="form-label" for="residual_risk">Residual Risk</label>
+                                        <textarea class="form-control @error('residual_risk') is-invalid @enderror" id="residual_risk" name="residual_risk">{{ old('residual_risk', $risk->residual_risk) }}</textarea>
                                         @error('residual_risk')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -663,10 +701,11 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Source of Assurance -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="source_of_assurance">Sumber Jaminan</label>
+                                        <label class="form-label" for="source_of_assurance">Source of Assurance</label>
                                         <textarea class="form-control @error('source_of_assurance') is-invalid @enderror" id="source_of_assurance"
-                                            name="source_of_assurance">{{ old('source_of_assurance') }}</textarea>
+                                            name="source_of_assurance">{{ old('source_of_assurance', $risk->source_of_assurance) }}</textarea>
                                         @error('source_of_assurance')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -674,81 +713,80 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Assurance Category -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="assurance_category">Kategori Jaminan</label>
-                                        <select class="form-select @error('assurance_category') is-invalid @enderror"
+                                        <label class="form-label" for="assurance_category">Assurance Category</label>
+                                        <select class="form-control @error('assurance_category') is-invalid @enderror"
                                             id="assurance_category" name="assurance_category">
                                             <option value="Activity Throughout"
-                                                {{ old('assurance_category') == 'Activity Throughout' ? 'selected' : '' }}>
-                                                Aktivitas Menyeluruh</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'Activity Throughout' ? 'selected' : '' }}>
+                                                Activity Throughout</option>
                                             <option value="Audit and Finance Committee"
-                                                {{ old('assurance_category') == 'Audit and Finance Committee' ? 'selected' : '' }}>
-                                                Komite Audit dan Keuangan</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'Audit and Finance Committee' ? 'selected' : '' }}>
+                                                Audit and Finance Committee</option>
                                             <option value="Audit Processes"
-                                                {{ old('assurance_category') == 'Audit Processes' ? 'selected' : '' }}>
-                                                Proses Audit</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'Audit Processes' ? 'selected' : '' }}>
+                                                Audit Processes</option>
                                             <option value="Audit Reports"
-                                                {{ old('assurance_category') == 'Audit Reports' ? 'selected' : '' }}>
-                                                Laporan
-                                                Audit</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'Audit Reports' ? 'selected' : '' }}>
+                                                Audit Reports</option>
                                             <option value="Claims"
-                                                {{ old('assurance_category') == 'Claims' ? 'selected' : '' }}>Klaim
-                                            </option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'Claims' ? 'selected' : '' }}>
+                                                Claims</option>
                                             <option value="Complaints"
-                                                {{ old('assurance_category') == 'Complaints' ? 'selected' : '' }}>
-                                                Keluhan</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'Complaints' ? 'selected' : '' }}>
+                                                Complaints</option>
                                             <option value="Credentialling"
-                                                {{ old('assurance_category') == 'Credentialling' ? 'selected' : '' }}>
-                                                Kredensial</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'Credentialling' ? 'selected' : '' }}>
+                                                Credentialling</option>
                                             <option value="Education and Training Records"
-                                                {{ old('assurance_category') == 'Education and Training Records' ? 'selected' : '' }}>
-                                                Catatan Pendidikan dan Pelatihan</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'Education and Training Records' ? 'selected' : '' }}>
+                                                Education and Training Records</option>
                                             <option value="Employee Engagement"
-                                                {{ old('assurance_category') == 'Employee Engagement' ? 'selected' : '' }}>
-                                                Keterlibatan Karyawan</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'Employee Engagement' ? 'selected' : '' }}>
+                                                Employee Engagement</option>
                                             <option value="External Audit"
-                                                {{ old('assurance_category') == 'External Audit' ? 'selected' : '' }}>
-                                                Audit Eksternal</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'External Audit' ? 'selected' : '' }}>
+                                                External Audit</option>
                                             <option value="Finance Report"
-                                                {{ old('assurance_category') == 'Finance Report' ? 'selected' : '' }}>
-                                                Laporan Keuangan</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'Finance Report' ? 'selected' : '' }}>
+                                                Finance Report</option>
                                             <option value="H&S Committee"
-                                                {{ old('assurance_category') == 'H&S Committee' ? 'selected' : '' }}>
-                                                Komite
-                                                K3</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'H&S Committee' ? 'selected' : '' }}>
+                                                H&S Committee</option>
                                             <option value="Incidents"
-                                                {{ old('assurance_category') == 'Incidents' ? 'selected' : '' }}>Insiden
-                                            </option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'Incidents' ? 'selected' : '' }}>
+                                                Incidents</option>
                                             <option value="Inspection Reports"
-                                                {{ old('assurance_category') == 'Inspection Reports' ? 'selected' : '' }}>
-                                                Laporan Inspeksi</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'Inspection Reports' ? 'selected' : '' }}>
+                                                Inspection Reports</option>
                                             <option value="Internal Audit"
-                                                {{ old('assurance_category') == 'Internal Audit' ? 'selected' : '' }}>
-                                                Audit Internal</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'Internal Audit' ? 'selected' : '' }}>
+                                                Internal Audit</option>
                                             <option value="Key Performance Indicator"
-                                                {{ old('assurance_category') == 'Key Performance Indicator' ? 'selected' : '' }}>
-                                                Indikator Kinerja Utama</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'Key Performance Indicator' ? 'selected' : '' }}>
+                                                Key Performance Indicator</option>
                                             <option value="Legislative and Regulatory"
-                                                {{ old('assurance_category') == 'Legislative and Regulatory' ? 'selected' : '' }}>
-                                                Legislatif dan Regulasi</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'Legislative and Regulatory' ? 'selected' : '' }}>
+                                                Legislative and Regulatory</option>
                                             <option value="Milestone Reached"
-                                                {{ old('assurance_category') == 'Milestone Reached' ? 'selected' : '' }}>
-                                                Pencapaian Milestone</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'Milestone Reached' ? 'selected' : '' }}>
+                                                Milestone Reached</option>
                                             <option value="Monitoring"
-                                                {{ old('assurance_category') == 'Monitoring' ? 'selected' : '' }}>
-                                                Pemantauan</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'Monitoring' ? 'selected' : '' }}>
+                                                Monitoring</option>
                                             <option value="OHS Reports"
-                                                {{ old('assurance_category') == 'OHS Reports' ? 'selected' : '' }}>Laporan
-                                                K3</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'OHS Reports' ? 'selected' : '' }}>
+                                                OHS Reports</option>
                                             <option value="Project Control"
-                                                {{ old('assurance_category') == 'Project Control' ? 'selected' : '' }}>
-                                                Kontrol Proyek</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'Project Control' ? 'selected' : '' }}>
+                                                Project Control</option>
                                             <option value="Quality Committee"
-                                                {{ old('assurance_category') == 'Quality Committee' ? 'selected' : '' }}>
-                                                Komite Mutu</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'Quality Committee' ? 'selected' : '' }}>
+                                                Quality Committee</option>
                                             <option value="Recruitment, Retention and Sick Leave Rates"
-                                                {{ old('assurance_category') == 'Recruitment, Retention and Sick Leave Rates' ? 'selected' : '' }}>
-                                                Tingkat Rekrutmen, Retensi dan Cuti Sakit</option>
+                                                {{ old('assurance_category', $risk->assurance_category) == 'Recruitment, Retention and Sick Leave Rates' ? 'selected' : '' }}>
+                                                Recruitment, Retention and Sick Leave Rates</option>
                                         </select>
                                         @error('assurance_category')
                                             <span class="invalid-feedback" role="alert">
@@ -757,9 +795,10 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Actions -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="actions">Tindakan</label>
-                                        <textarea class="form-control @error('actions') is-invalid @enderror" id="actions" name="actions">{{ old('actions') }}</textarea>
+                                        <label class="form-label" for="actions">Actions</label>
+                                        <textarea class="form-control @error('actions') is-invalid @enderror" id="actions" name="actions">{{ old('actions', $risk->actions) }}</textarea>
                                         @error('actions')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -767,13 +806,13 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Action Assigned Date -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="action_assigned_date">Tanggal Penugasan
-                                            Tindakan</label>
+                                        <label class="form-label" for="action_assigned_date">Action Assigned Date</label>
                                         <input type="date"
                                             class="form-control @error('action_assigned_date') is-invalid @enderror"
                                             id="action_assigned_date" name="action_assigned_date"
-                                            value="{{ old('action_assigned_date') }}">
+                                            value="{{ old('action_assigned_date', $risk->action_assigned_date) }}">
                                         @error('action_assigned_date')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -781,12 +820,13 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Action By Date -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="action_by_date">Tanggal Batas Tindakan</label>
+                                        <label class="form-label" for="action_by_date">Action By Date</label>
                                         <input type="date"
                                             class="form-control @error('action_by_date') is-invalid @enderror"
                                             id="action_by_date" name="action_by_date"
-                                            value="{{ old('action_by_date') }}">
+                                            value="{{ old('action_by_date', $risk->action_by_date) }}">
                                         @error('action_by_date')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -794,10 +834,11 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Action Description -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="action_description">Deskripsi Tindakan</label>
+                                        <label class="form-label" for="action_description">Action Description</label>
                                         <textarea class="form-control @error('action_description') is-invalid @enderror" id="action_description"
-                                            name="action_description">{{ old('action_description') }}</textarea>
+                                            name="action_description">{{ old('action_description', $risk->action_description) }}</textarea>
                                         @error('action_description')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -805,11 +846,13 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Allocated To -->
                                     <div class="form-group mb-3">
-                                        <label class="form-label" for="allocated_to">Dialokasikan Kepada</label>
+                                        <label class="form-label" for="allocated_to">Allocated To</label>
                                         <input type="text"
                                             class="form-control @error('allocated_to') is-invalid @enderror"
-                                            id="allocated_to" name="allocated_to" value="{{ old('allocated_to') }}">
+                                            id="allocated_to" name="allocated_to"
+                                            value="{{ old('allocated_to', $risk->allocated_to) }}">
                                         @error('allocated_to')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -817,11 +860,13 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Completed On -->
                                     <div class="form-group mb-3">
-                                        <label class="form-label" for="completed_on">Diselesaikan Pada</label>
+                                        <label class="form-label" for="completed_on">Completed On</label>
                                         <input type="date"
                                             class="form-control @error('completed_on') is-invalid @enderror"
-                                            id="completed_on" name="completed_on" value="{{ old('completed_on') }}">
+                                            id="completed_on" name="completed_on"
+                                            value="{{ old('completed_on', $risk->completed_on) }}">
                                         @error('completed_on')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -829,10 +874,11 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Action Response -->
                                     <div class="form-group mb-3">
-                                        <label class="form-label" for="action_response">Respons Tindakan</label>
+                                        <label class="form-label" for="action_response">Action Response</label>
                                         <textarea class="form-control @error('action_response') is-invalid @enderror" id="action_response"
-                                            name="action_response">{{ old('action_response') }}</textarea>
+                                            name="action_response">{{ old('action_response', $risk->action_response) }}</textarea>
                                         @error('action_response')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -840,9 +886,10 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Progress Note -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="progress_note">Catatan Kemajuan</label>
-                                        <textarea class="form-control @error('progress_note') is-invalid @enderror" id="progress_note" name="progress_note">{{ old('progress_note') }}</textarea>
+                                        <label class="form-label" for="progress_note">Progress Note</label>
+                                        <textarea class="form-control @error('progress_note') is-invalid @enderror" id="progress_note" name="progress_note">{{ old('progress_note', $risk->progress_note) }}</textarea>
                                         @error('progress_note')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -850,9 +897,10 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Journal Type -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="journal_type">Tipe Jurnal</label>
-                                        <textarea class="form-control @error('journal_type') is-invalid @enderror" id="journal_type" name="journal_type">{{ old('journal_type') }}</textarea>
+                                        <label class="form-label" for="journal_type">Journal Type</label>
+                                        <textarea class="form-control @error('journal_type') is-invalid @enderror" id="journal_type" name="journal_type">{{ old('journal_type', $risk->journal_type) }}</textarea>
                                         @error('journal_type')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -860,10 +908,11 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Journal Description -->
                                     <div class="form-group mb-3">
-                                        <label class="form-label" for="journal_description">Deskripsi Jurnal</label>
+                                        <label class="form-label" for="journal_description">Journal Description</label>
                                         <textarea class="form-control @error('journal_description') is-invalid @enderror" id="journal_description"
-                                            name="journal_description">{{ old('journal_description') }}</textarea>
+                                            name="journal_description">{{ old('journal_description', $risk->journal_description) }}</textarea>
                                         @error('journal_description')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -871,11 +920,13 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Date Stamp -->
                                     <div class="form-group mb-3">
-                                        <label class="form-label" for="date_stamp">Stempel Tanggal</label>
+                                        <label class="form-label" for="date_stamp">Date Stamp</label>
                                         <input type="datetime-local"
                                             class="form-control @error('date_stamp') is-invalid @enderror"
-                                            id="date_stamp" name="date_stamp" value="{{ old('date_stamp') }}">
+                                            id="date_stamp" name="date_stamp"
+                                            value="{{ old('date_stamp', $risk->date_stamp) }}">
                                         @error('date_stamp')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -883,11 +934,12 @@
                                         @enderror
                                     </div>
 
+                                    <!-- Document -->
                                     <div class="form-group mb-3">
-                                        <label class="form-label" for="document">Dokumen</label>
+                                        <label class="form-label" for="document">Document</label>
                                         <input type="file"
                                             class="form-control @error('document') is-invalid @enderror" id="document"
-                                            name="document" value="{{ old('document') }}">
+                                            name="document" value="{{ old('document', $risk->document) }}">
                                         @error('document')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -895,43 +947,9 @@
                                         @enderror
                                     </div>
 
-                                    <!-- Nama Penginput -->
-                                    <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="user_name">Nama Penginput</label>
-                                        <input type="text" class="form-control"
-                                            value="{{ Auth::user()->name ?? 'Nama tidak tersedia' }}" readonly>
-                                        <!-- Hidden field to pass the actual user_id -->
-                                        <input type="hidden" name="user_id" value="{{ Auth::id() }}">
-                                        @error('user_id')
-                                            <span class="invalid-feedback" role="alert">
-                                                <strong>{{ $message }}</strong>
-                                            </span>
-                                        @enderror
-                                    </div>
-
-                                    <!-- Divisi -->
-                                    <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="division">Divisi</label>
-                                        <input type="text" class="form-control"
-                                            value="{{ Auth::user()->division ? Auth::user()->division->name : 'Divisi tidak tersedia' }}"
-                                            readonly>
-                                        <!-- Hidden field to pass the actual division_id -->
-                                        <input type="hidden" name="division_id"
-                                            value="{{ Auth::user()->division_id ?? '' }}">
-                                        @error('division_id')
-                                            <span class="invalid-feedback" role="alert">
-                                                <strong>{{ $message }}</strong>
-                                            </span>
-                                        @enderror
-                                    </div>
-
-                                    <!-- Submit and Reset buttons -->
-                                    <div class="row">
-                                        <div class="col-12 d-flex justify-content-end">
-                                            <button type="reset"
-                                                class="btn btn-light-secondary me-1 mb-1">Reset</button>
-                                            <button type="submit" class="btn btn-primary me-1 mb-1">Simpan</button>
-                                        </div>
+                                    <!-- Submit Button -->
+                                    <div class="form-group mb-3">
+                                        <button type="submit" class="btn btn-primary">Update Risk</button>
                                     </div>
                                 </form>
                             </div>

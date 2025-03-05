@@ -15,13 +15,8 @@ use Modules\User\Database\Seeders\UserDatabaseSeeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
         $this->call([
             DivisionDatabaseSeeder::class,
             UserDatabaseSeeder::class,

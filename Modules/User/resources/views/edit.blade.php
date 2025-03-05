@@ -6,14 +6,14 @@
             <div class="page-title">
                 <div class="row">
                     <div class="col-12 col-md-6 order-md-1 order-last">
-                        <h3>Edit User</h3>
-                        <p class="text-subtitle text-muted">Update the user account information.</p>
+                        <h3>Ubah Pengguna</h3>
+                        <p class="text-subtitle text-muted">Perbarui informasi akun pengguna.</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Basic multiple Column Form section start -->
+        <!-- Formulir Edit Pengguna Mulai -->
         <section id="multiple-column-form">
             <div class="row match-height">
                 <div class="col-12">
@@ -22,13 +22,13 @@
                             <div class="card-body">
                                 <form method="POST" action="{{ route('users.update', $user->id) }}">
                                     @csrf
-                                    @method('PUT') <!-- Use PUT for updates -->
+                                    @method('PUT')
 
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="role_id">Role</label>
+                                        <label class="form-label" for="role_id">Peran</label>
                                         <select class="form-control @error('role_id') is-invalid @enderror" id="role_id"
                                             name="role_id">
-                                            <option value="" disabled>Choose role...</option>
+                                            <option value="" disabled>Pilih peran...</option>
                                             @foreach ($roles as $role)
                                                 <option value="{{ $role->id }}"
                                                     {{ $user->roles->pluck('id')->contains($role->id) ? 'selected' : '' }}>
@@ -44,7 +44,7 @@
                                     </div>
 
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="name">Name</label>
+                                        <label class="form-label" for="name">Nama</label>
                                         <input type="text" class="form-control @error('name') is-invalid @enderror"
                                             id="name" name="name" value="{{ old('name', $user->name) }}">
                                         @error('name')
@@ -76,9 +76,9 @@
                                         @enderror
                                     </div>
 
-                                    <!-- Phone Field -->
+                                    <!-- Field Telepon -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="phone">Phone</label>
+                                        <label class="form-label" for="phone">Telepon</label>
                                         <input type="text" class="form-control @error('phone') is-invalid @enderror"
                                             id="phone" name="phone" value="{{ old('phone', $user->phone) }}">
                                         @error('phone')
@@ -88,12 +88,12 @@
                                         @enderror
                                     </div>
 
-                                    <!-- Division Field -->
+                                    <!-- Field Divisi -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="division_id">Division</label>
+                                        <label class="form-label" for="division_id">Divisi</label>
                                         <select class="form-control @error('division_id') is-invalid @enderror"
                                             id="division_id" name="division_id">
-                                            <option value="" disabled>Choose division...</option>
+                                            <option value="" disabled>Pilih divisi...</option>
                                             @foreach ($divisions as $division)
                                                 <option value="{{ $division->id }}"
                                                     {{ $user->division_id == $division->id ? 'selected' : '' }}>
@@ -108,17 +108,17 @@
                                         @enderror
                                     </div>
 
-                                    <!-- Status Field -->
+                                    <!-- Field Status -->
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="status">Status</label>
                                         <select name="status" id="status"
                                             class="form-select @error('status') is-invalid @enderror">
                                             <option value="active"
-                                                {{ old('status', $user->status) == 'active' ? 'selected' : '' }}>Active
+                                                {{ old('status', $user->status) == 'active' ? 'selected' : '' }}>Aktif
                                             </option>
                                             <option value="inactive"
                                                 {{ old('status', $user->status) == 'inactive' ? 'selected' : '' }}>
-                                                Inactive</option>
+                                                Tidak Aktif</option>
                                         </select>
                                         @error('status')
                                             <span class="invalid-feedback" role="alert">
@@ -127,12 +127,12 @@
                                         @enderror
                                     </div>
 
-                                    <!-- Password Field -->
+                                    <!-- Field Kata Sandi -->
                                     <div class="form-group mb-3">
-                                        <label class="form-label" for="password">Password</label>
+                                        <label class="form-label" for="password">Kata Sandi</label>
                                         <input type="password" class="form-control @error('password') is-invalid @enderror"
                                             id="password" name="password">
-                                        <span class="text-muted small">(Leave blank if not changing)</span>
+                                        <span class="text-muted small">(Kosongkan jika tidak mengubah kata sandi)</span>
                                         @error('password')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -143,8 +143,8 @@
                                     <div class="row">
                                         <div class="col-12 d-flex justify-content-end">
                                             <a href="{{ route('users.index') }}"
-                                                class="btn btn-light-secondary me-1 mb-1">Cancel</a>
-                                            <button type="submit" class="btn btn-primary me-1 mb-1">Update</button>
+                                                class="btn btn-light-secondary me-1 mb-1">Batal</a>
+                                            <button type="submit" class="btn btn-primary me-1 mb-1">Perbarui</button>
                                         </div>
                                     </div>
                                 </form>
@@ -154,6 +154,6 @@
                 </div>
             </div>
         </section>
-        <!-- Basic multiple Column Form section end -->
+        <!-- Formulir Edit Pengguna Selesai -->
     </div>
 @endsection

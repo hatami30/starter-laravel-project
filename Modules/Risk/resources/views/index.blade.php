@@ -9,27 +9,42 @@
                         <h3>Risiko</h3>
                         <p class="text-subtitle text-muted">Lihat dan kelola semua risiko.</p>
                     </div>
+                    @if (isset($userDivision))
+                        <div class="col-12 col-md-6 order-md-2 order-first">
+                            <div class="float-end">
+                                <span class="badge bg-primary">Divisi: {{ $userDivision }}</span>
+                                @if ($canViewAllRisks)
+                                    <span class="badge bg-success ms-1">Akses: Semua Risiko</span>
+                                @else
+                                    <span class="badge bg-info ms-1">Akses: Risiko Divisi Sendiri</span>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
 
-        <!-- Basic Tables start -->
         <section class="section">
             <div class="row">
                 <div class="col-12">
-
                     <div class="card">
                         <div class="card-content">
                             <div class="card-header d-flex justify-content-end align-items-center">
-
                                 <div class="d-flex align-items-center">
-                                    <!-- Cog Icon as Modal Button -->
+                                    <!-- Tombol Print Excel -->
+                                    <button type="button" class="btn border-0 p-0 me-3"
+                                        onclick="window.location.href='{{ route('risks.export.excel') }}'">
+                                        <i class='bx bx-sm bx-printer'></i>
+                                    </button>
+
+                                    <!-- Tombol Pengaturan Tabel -->
                                     <button type="button" class="btn border-0 p-0 me-3" data-bs-toggle="modal"
                                         data-bs-target="#tableSettingsModal">
                                         <i class='bx bx-sm bx-cog'></i>
                                     </button>
 
-                                    <!-- Modal for Table Settings -->
+                                    <!-- Modal Pengaturan Tabel -->
                                     <div class="modal fade" id="tableSettingsModal" tabindex="-1"
                                         aria-labelledby="tableSettingsModalLabel" aria-hidden="true">
                                         <div class="modal-dialog modal-lg">
@@ -43,7 +58,6 @@
                                                 <div class="modal-body">
                                                     <form method="POST" action="{{ route('risks.save.table.settings') }}">
                                                         @csrf
-                                                        <!-- Columns Visibility -->
                                                         <h6 class="fw-bold">Visibilitas Kolom</h6>
                                                         <p class="text-muted">Pilih kolom yang ingin Anda tampilkan di
                                                             tabel.</p>
@@ -65,7 +79,6 @@
                                                             </div>
                                                         </div>
 
-                                                        <!-- Show Numbering Option -->
                                                         <h6 class="fw-bold mt-4">Tampilkan Nomor Baris</h6>
                                                         <p class="text-muted">Aktifkan opsi ini untuk menampilkan nomor
                                                             baris di sampingnya.</p>
@@ -78,7 +91,6 @@
                                                                 Baris</label>
                                                         </div>
 
-                                                        <!-- Limit Dropdown -->
                                                         <div class="form-group my-4">
                                                             <h6 for="limit" class="fw-bold mt-4">Item per Halaman (Batas)
                                                             </h6>
@@ -95,7 +107,6 @@
                                                             </select>
                                                         </div>
 
-                                                        <!-- Save Button -->
                                                         <div class="d-flex justify-content-end">
                                                             <button type="submit" class="btn btn-primary">Simpan
                                                                 Pengaturan</button>
@@ -106,12 +117,13 @@
                                         </div>
                                     </div>
 
+                                    <!-- Tombol Filter -->
                                     <button type="button" class="btn border-0 p-0 me-3" data-bs-toggle="modal"
                                         data-bs-target="#tableFiltersModal">
                                         <i class='bx bx-sm bx-filter-alt'></i>
                                     </button>
 
-                                    <!-- Modal for Filters -->
+                                    <!-- Modal untuk filter tabel -->
                                     <div class="modal fade" id="tableFiltersModal" tabindex="-1"
                                         aria-labelledby="tableFiltersModalLabel" aria-hidden="true">
                                         <div class="modal-dialog modal-lg">
@@ -123,14 +135,12 @@
                                                 </div>
                                                 <div class="modal-body">
                                                     <form method="GET" action="{{ route('risks.index') }}">
-                                                        <!-- Search Input -->
                                                         <div class="mb-3">
                                                             <label for="search" class="fw-bold">Cari:</label>
                                                             <input type="text" class="form-control" placeholder="Cari"
                                                                 name="q" value="{{ request('q') }}" />
                                                         </div>
 
-                                                        <!-- Limit Dropdown -->
                                                         <div class="mb-3">
                                                             <label for="limit" class="fw-bold">Batas:</label>
                                                             <select name="limit" class="form-select">
@@ -143,7 +153,6 @@
                                                             </select>
                                                         </div>
 
-                                                        <!-- Sort By Dropdown -->
                                                         <div class="mb-3">
                                                             <label for="sort_by" class="fw-bold">Urutkan
                                                                 Berdasarkan:</label>
@@ -159,7 +168,6 @@
                                                             </select>
                                                         </div>
 
-                                                        <!-- Order Dropdown -->
                                                         <div class="mb-3">
                                                             <label for="sort_order" class="fw-bold">Urutan:</label>
                                                             <select name="sort_order" class="form-select">
@@ -172,7 +180,6 @@
                                                             </select>
                                                         </div>
 
-                                                        <!-- Role Filter Dropdown -->
                                                         <div class="mb-3">
                                                             <label for="role" class="fw-bold">Peran:</label>
                                                             <select name="role" class="form-select">
@@ -186,7 +193,6 @@
                                                             </select>
                                                         </div>
 
-                                                        <!-- Buttons for Apply Filters and Clear Filters -->
                                                         <div class="d-flex justify-content-end">
                                                             <button type="submit" class="btn btn-primary">
                                                                 Terapkan Filter
@@ -202,17 +208,14 @@
                                         </div>
                                     </div>
 
-                                    <!-- New Risk Button -->
                                     @can('create_risks', $risks)
                                         <a href="{{ route('risks.create') }}" type="button" class="btn border-0 p-0 me-3">
                                             <i class='bx bx-sm bx-plus-circle'></i>
                                         </a>
                                     @endcan
-
                                 </div>
                             </div>
                             <div class="card-body">
-                                <!-- Table with outer spacing -->
                                 <div class="table-responsive">
                                     <table class="table table-lg">
                                         <thead>
@@ -223,7 +226,7 @@
                                                 @foreach ($visibleColumns as $visibleColumn)
                                                     <th>{{ ucfirst(str_replace('_', ' ', $visibleColumn)) }}</th>
                                                 @endforeach
-                                                @if (Auth::user()->can('edit_risks') || Auth::user()->can('delete_risks'))
+                                                @if (Auth::user()->can('edit_risks') || Auth::user()->can('delete_risks') || Auth::user()->can('view_risks'))
                                                     <th>Aksi</th>
                                                 @endif
                                             </tr>
@@ -240,8 +243,7 @@
                                                         </td>
                                                     @endforeach
                                                     <td>
-                                                        <!-- Active Status -->
-                                                        @if (Auth::user()->can('edit_risks') || Auth::user()->can('delete_risks'))
+                                                        @if (Auth::user()->can('edit_risks') || Auth::user()->can('delete_risks') || Auth::user()->can('view_risks'))
                                                             <div class="d-flex gap-2">
                                                                 @can('edit_risks', $risk)
                                                                     <a href="{{ route('risks.edit', $risk->id) }}"
@@ -253,15 +255,22 @@
                                                                 @can('delete_risks', $risk)
                                                                     <form method="POST"
                                                                         action="{{ route('risks.destroy', $risk->id) }}"
-                                                                        style="margin: 0;">
+                                                                        style="margin: 0;" class="delete-form">
                                                                         @csrf
                                                                         @method('DELETE')
-                                                                        <button type="submit"
-                                                                            class="btn btn-sm btn-outline-danger d-flex justify-content-center align-items-center p-0"
+                                                                        <button type="button"
+                                                                            class="btn btn-sm btn-outline-danger d-flex justify-content-center align-items-center p-0 delete-btn"
                                                                             style="width: 36px; height: 36px;">
                                                                             <i class="bx bx-trash"></i>
                                                                         </button>
                                                                     </form>
+                                                                @endcan
+                                                                @can('view_risks', $risk)
+                                                                    {{-- <a href="{{ route('risks.view.pdf', $risk->id) }}"
+                                                                        class="btn btn-sm btn-outline-info d-flex justify-content-center align-items-center p-0"
+                                                                        style="width: 36px; height: 36px;">
+                                                                        <i class="bx bx-show"></i>
+                                                                    </a> --}}
                                                                 @endcan
                                                             </div>
                                                         @endif
@@ -278,7 +287,6 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <!-- Pagination links -->
                                 <div class="row">
                                     <div class="col-12 d-flex justify-content-end">
                                         {{ $risks->withQueryString()->links() }}
@@ -290,25 +298,28 @@
                 </div>
             </div>
         </section>
-        <!-- Basic Tables end -->
     </div>
 @endsection
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        const deleteButtons = document.querySelectorAll('#delete-btn');
+        // Konfirmasi sebelum menghapus
+        const deleteButtons = document.querySelectorAll('.delete-btn');
 
         deleteButtons.forEach(button => {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
                 const form = this.closest('form');
+
+                // Konfirmasi menggunakan SweetAlert2
                 Swal.fire({
                     title: 'Apakah Anda yakin?',
                     text: "Anda tidak akan bisa mengembalikannya!",
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal',
                     customClass: {
                         confirmButton: 'btn btn-primary mx-1',
                         cancelButton: 'btn btn-danger mx-1'
@@ -316,10 +327,34 @@
                     buttonsStyling: false
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        form.submit();
+                        form.submit(); // Mengirimkan form jika dikonfirmasi
                     }
                 });
             });
         });
+
+        // Menampilkan notifikasi jika operasi berhasil
+        @if (session('success'))
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: '{{ session('success') }}',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        @endif
+
+        // Menampilkan notifikasi jika operasi gagal
+        @if (session('error'))
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: '{{ session('error') }}',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        @endif
     </script>
 @endpush

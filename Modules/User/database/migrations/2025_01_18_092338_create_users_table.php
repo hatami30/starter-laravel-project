@@ -14,7 +14,8 @@ return new class extends Migration {
             $table->string('name');
             $table->string('email')->unique();
             $table->string('phone')->unique();
-            $table->foreignId('division_id')->constrained('divisions')->onDelete('cascade');
+            $table->foreignId('division_id')->constrained('divisions')->onDelete('restrict');
+            // $table->foreignId('position_id')->constrained('positions')->onDelete('restrict');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

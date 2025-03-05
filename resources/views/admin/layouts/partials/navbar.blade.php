@@ -68,7 +68,7 @@
                         </div>
                         <div class="user-img d-flex align-items-center">
                             <div class="avatar avatar-md">
-                                <img src="{{ getUserImageProfilePath(Auth::user()) }}">
+                                <img src="{{ asset('img/avatar.jpg') }}" alt="Foto Profil">
                             </div>
                         </div>
                     </div>
@@ -76,27 +76,27 @@
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton"
                     style="min-width: 11rem;">
                     <li>
-                        <h6 class="dropdown-header">Hello, {{ strtok(Auth::user()->name, ' ') }}!</h6>
+                        <h6 class="dropdown-header">Hay, {{ strtok(Auth::user()->name, ' ') }}!</h6>
                     </li>
                     <li>
                         <a class="dropdown-item"
                             href="{{ route('show.profile', ['username' => Auth::user()->username]) }}">
                             <i class="icon-mid bi bi-person me-2"></i>
-                            My Profile
+                            Profil Saya
                         </a>
                     </li>
                     {{-- <li><a class="dropdown-item" href="#"><i class="icon-mid bi bi-gear me-2"></i>
                             Settings</a></li>
                     <li><a class="dropdown-item" href="#"><i class="icon-mid bi bi-wallet me-2"></i>
                             Wallet</a></li>
-                    <li> --}}
+                    <li>
                     <hr class="dropdown-divider">
-                    </li>
+                    </li> --}}
                     <li>
                         <form action="{{ route('auth.logout') }}" method="POST" style="display: inline;">
                             @csrf
                             <button type="submit" class="dropdown-item">
-                                <i class="icon-mid bi bi-box-arrow-left me-2"></i> Logout
+                                <i class="icon-mid bi bi-box-arrow-left me-2"></i> Keluar
                             </button>
                         </form>
                     </li>

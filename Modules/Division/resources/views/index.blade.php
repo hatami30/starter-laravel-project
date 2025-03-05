@@ -13,7 +13,6 @@
             </div>
         </div>
 
-        <!-- Daftar Divisi -->
         <section class="section">
             <div class="row">
                 <div class="col-12">
@@ -21,13 +20,11 @@
                         <div class="card-content">
                             <div class="card-header d-flex justify-content-end align-items-center">
                                 <div class="d-flex align-items-center">
-                                    <!-- Tombol Pengaturan Tabel -->
                                     <button type="button" class="btn border-0 p-0 me-3" data-bs-toggle="modal"
                                         data-bs-target="#tableSettingsModal">
                                         <i class="bx bx-sm bx-cog"></i>
                                     </button>
 
-                                    <!-- Modal Pengaturan Tabel -->
                                     <div class="modal fade" id="tableSettingsModal" tabindex="-1"
                                         aria-labelledby="tableSettingsModalLabel" aria-hidden="true">
                                         <div class="modal-dialog modal-lg">
@@ -42,7 +39,6 @@
                                                     <form method="POST"
                                                         action="{{ route('divisions.save.table.settings') }}">
                                                         @csrf
-                                                        <!-- Pilihan Kolom yang Tampil -->
                                                         <h6 class="fw-bold">Visibilitas Kolom</h6>
                                                         <p class="text-muted">Pilih kolom yang ingin Anda tampilkan dalam
                                                             tabel.</p>
@@ -64,7 +60,6 @@
                                                             </div>
                                                         </div>
 
-                                                        <!-- Opsi Menampilkan Nomor Baris -->
                                                         <h6 class="fw-bold mt-4">Tampilkan Nomor Baris</h6>
                                                         <p class="text-muted">Aktifkan opsi ini untuk menampilkan nomor pada
                                                             setiap baris.</p>
@@ -77,7 +72,6 @@
                                                                 Baris</label>
                                                         </div>
 
-                                                        <!-- Batas Jumlah Item Per Halaman -->
                                                         <div class="form-group my-4">
                                                             <h6 class="fw-bold mt-4">Item Per Halaman (Batas)</h6>
                                                             <p class="text-muted">Pilih jumlah item yang akan ditampilkan di
@@ -102,13 +96,11 @@
                                         </div>
                                     </div>
 
-                                    <!-- Tombol Filter -->
                                     <button type="button" class="btn border-0 p-0 me-3" data-bs-toggle="modal"
                                         data-bs-target="#tableFiltersModal">
                                         <i class='bx bx-sm bx-filter-alt'></i>
                                     </button>
 
-                                    <!-- Modal Filter -->
                                     <div class="modal fade" id="tableFiltersModal" tabindex="-1"
                                         aria-labelledby="tableFiltersModalLabel" aria-hidden="true">
                                         <div class="modal-dialog modal-lg">
@@ -120,16 +112,12 @@
                                                 </div>
                                                 <div class="modal-body">
                                                     <form method="GET" action="{{ route('divisions.index') }}">
-                                                        <!-- Filter berdasarkan Nama -->
                                                         <div class="mb-3">
-                                                            <label for="name" class="fw-bold">Cari berdasarkan Nama
-                                                                Divisi:</label>
+                                                            <label for="name" class="fw-bold">Cari:</label>
                                                             <input type="text" name="q" class="form-control"
-                                                                placeholder="Cari berdasarkan nama"
-                                                                value="{{ request('q') }}" />
+                                                                placeholder="Cari" value="{{ request('q') }}" />
                                                         </div>
 
-                                                        <!-- Pilihan Batas -->
                                                         <div class="mb-3">
                                                             <label for="limit" class="fw-bold">Batas:</label>
                                                             <select name="limit" class="form-select">
@@ -142,7 +130,6 @@
                                                             </select>
                                                         </div>
 
-                                                        <!-- Dropdown Urutkan Berdasarkan -->
                                                         <div class="mb-3">
                                                             <label for="sort_by" class="fw-bold">Urutkan
                                                                 Berdasarkan:</label>
@@ -158,7 +145,6 @@
                                                             </select>
                                                         </div>
 
-                                                        <!-- Dropdown Urutan -->
                                                         <div class="mb-3">
                                                             <label for="sort_order" class="fw-bold">Urutan:</label>
                                                             <select name="sort_order" class="form-select">
@@ -171,7 +157,6 @@
                                                             </select>
                                                         </div>
 
-                                                        <!-- Terapkan Filter -->
                                                         <div class="d-flex justify-content-end">
                                                             <button type="submit" class="btn btn-primary">Terapkan
                                                                 Filter</button>
@@ -184,7 +169,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Tombol Divisi Baru -->
                                     @can('create_divisions')
                                         <a href="{{ route('divisions.create') }}" type="button"
                                             class="btn border-0 p-0 me-3">
@@ -194,7 +178,6 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                <!-- Tabel Divisi -->
                                 <div class="table-responsive">
                                     <table class="table table-lg">
                                         <thead>
@@ -234,7 +217,8 @@
                                                                         @csrf
                                                                         @method('DELETE')
                                                                         <button type="submit"
-                                                                            class="btn btn-sm btn-outline-danger">
+                                                                            class="btn btn-sm btn-outline-danger"
+                                                                            id="delete-btn">
                                                                             <i class="bx bx-trash"></i>
                                                                         </button>
                                                                     </form>
@@ -255,7 +239,6 @@
                                     </table>
                                 </div>
 
-                                <!-- Pagination -->
                                 <div class="row">
                                     <div class="col-12 d-flex justify-content-end">
                                         {{ $divisions->withQueryString()->links() }}
@@ -281,7 +264,7 @@
                 const form = this.closest('form');
                 Swal.fire({
                     title: 'Apakah Anda yakin?',
-                    text: "Anda tidak akan bisa mengembalikan data ini!",
+                    text: "Anda tidak akan bisa mengembalikannya!",
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Ya, hapus!',
@@ -297,5 +280,43 @@
                 });
             });
         });
+
+        let errorMessages = @json($errors->all());
+        console.log(errorMessages);
+
+        @if ($errors->any())
+            errorMessages.forEach((error) => {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: error,
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            });
+        @endif
+
+        @if (session('error'))
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: 'Oops, ada yang salah...',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        @endif
+
+        @if (session('success'))
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: '{{ session('success') }}',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        @endif
     </script>
 @endpush

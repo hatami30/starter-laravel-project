@@ -18,9 +18,9 @@ class RoleDatabaseSeeder extends Seeder
             'Master' => [
                 'view_profile',
                 'update_profile',
-                
+
                 'view_dashboard',
-                
+
                 'view_users',
                 'create_users',
                 'edit_users',

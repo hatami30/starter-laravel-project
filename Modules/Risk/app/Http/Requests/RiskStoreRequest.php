@@ -38,8 +38,8 @@ class RiskStoreRequest extends FormRequest
             'relevant_committee' => 'required|in:Antimicroba Resistency Control,Ethics,Health Promotion,Infection Control,MDGs,Medical,Medical Record,Medical Record Extermination,Medical - Ethico Legal,Nursing,Occupational Health and Safety,Pain Management,Patient Safety,Pharmacy and Therapatical,PONEK,Quality,Quality and Patient Safety,TB Dots,Nil',
 
             // Key Personnel
-            'accountable_manager' => 'required|string|max:255',
-            'responsible_supervisor' => 'required|string|max:255',
+            'accountable_manager' => 'nullable|string|max:255',
+            'responsible_supervisor' => 'nullable|string|max:255',
             'notify_of_associated_incidents' => 'required|in:Yes,No',
 
             // Causes, Consequences, and Controls
@@ -79,20 +79,16 @@ class RiskStoreRequest extends FormRequest
             'journal_type' => 'required|string|max:255',
             'journal_description' => 'nullable|string|max:1000',
             'date_stamp' => 'nullable|date_format:Y-m-d H:i:s',
-            'document' => 'nullable|mimes:pdf,docx,xlsx,png,jpg,jpeg|max:2048', // Example: accepts file upload
+            'document' => 'nullable|file|mimes:pdf,doc,docx,png,jpg,jpeg|max:2048', // Example: accepts file upload
+
+            // User and Division
+            'user_id' => 'nullable|exists:users,id',
+            'division_id' => 'nullable|exists:divisions,id',
         ];
     }
 
     /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
-    {
-        return true;
-    }
-
-    /**
-     * Tentukan pesan kesalahan yang ditampilkan jika validasi gagal.
+     * Define custom validation messages.
      *
      * @return array
      */
@@ -106,11 +102,12 @@ class RiskStoreRequest extends FormRequest
             'max' => ':attribute tidak boleh lebih dari :max karakter.',
             'mimes' => ':attribute harus berupa file dengan format: :values.',
             'nullable' => ':attribute boleh kosong.',
+            'exists' => ':attribute tidak ditemukan.',
         ];
     }
 
     /**
-     * Tentukan atribut untuk validasi
+     * Define attribute names for validation.
      *
      * @return array
      */
@@ -162,6 +159,8 @@ class RiskStoreRequest extends FormRequest
             'journal_description' => 'Deskripsi Jurnal',
             'date_stamp' => 'Stempel Waktu',
             'document' => 'Dokumen',
+            'user_id' => 'ID Pengguna',
+            'division_id' => 'ID Divisi',
         ];
     }
 }

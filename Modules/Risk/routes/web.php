@@ -57,5 +57,21 @@ Route::prefix('admin')->middleware(['redirect.if.not.authenticated'])->group(fun
         Route::post('save-table-settings', [RiskController::class, 'saveTableSettings'])
             ->middleware('can:view_risks')
             ->name('risks.save.table.settings');
+
+        // Route untuk mengekspor data Risiko ke Excel
+        Route::get('export/excel', [RiskController::class, 'exportToExcel'])
+            ->middleware('can:view_risks')
+            ->name('risks.export.excel');
+
+        // Route untuk mengekspor data Risiko ke PDF
+        Route::get('export/pdf', [RiskController::class, 'exportToPDF'])
+            ->middleware('can:view_risks')
+            ->name('risks.export.pdf');
+
+        // Route untuk melihat detail Risiko dalam bentuk PDF
+        Route::get('{risk}/view-pdf', [RiskController::class, 'viewPdf'])
+            ->middleware('can:view_risks') // Add this middleware to check permissions
+            ->name('risks.view.pdf'); // This route generates a PDF of a single risk
+
     });
 });

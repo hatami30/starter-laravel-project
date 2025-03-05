@@ -6,8 +6,8 @@
             <div class="page-title">
                 <div class="row">
                     <div class="col-12 col-md-6 order-md-1 order-last">
-                        <h3>New User</h3>
-                        <p class="text-subtitle text-muted">Create a new user account.</p>
+                        <h3>Tambah Pengguna</h3>
+                        <p class="text-subtitle text-muted">Buat akun pengguna baru.</p>
                     </div>
                 </div>
             </div>
@@ -22,12 +22,12 @@
                                 <form method="POST" action="{{ route('users.store') }}">
                                     @csrf
 
-                                    <!-- Role Selection -->
+                                    <!-- Pemilihan Peran -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="role_id">Role</label>
+                                        <label class="form-label" for="role_id">Peran</label>
                                         <select class="form-control @error('role_id') is-invalid @enderror" id="role_id"
                                             name="role_id">
-                                            <option value="" selected>Choose role...</option>
+                                            <option value="" selected>Pilih peran...</option>
                                             @foreach ($roles as $role)
                                                 <option value="{{ $role->id }}"
                                                     {{ old('role_id') == $role->id ? 'selected' : '' }}>{{ $role->name }}
@@ -41,9 +41,9 @@
                                         @enderror
                                     </div>
 
-                                    <!-- Name Field -->
+                                    <!-- Nama -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="name">Name</label>
+                                        <label class="form-label" for="name">Nama</label>
                                         <input type="text" class="form-control @error('name') is-invalid @enderror"
                                             id="name" name="name" value="{{ old('name') }}">
                                         @error('name')
@@ -53,28 +53,19 @@
                                         @enderror
                                     </div>
 
-                                    <!-- Username Field -->
-                                    <div
-                                        class="form-group
-                                        @if ($errors->has('username')) mandatory @endif mb-3">
-                                        <label
-                                            class="form-label
-                                            @if ($errors->has('username')) text-danger @endif"
-                                            for="username">Username</label>
+                                    <!-- Username -->
+                                    <div class="form-group mandatory mb-3">
+                                        <label class="form-label" for="username">Username</label>
                                         <input type="text" class="form-control @error('username') is-invalid @enderror"
-                                            id="username" name="username" value="{{ old('username') }}">
+                                            id="username" name="username" value="{{ old('username') }}" required>
                                         @error('username')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
                                             </span>
                                         @enderror
-
-                                        @if ($errors->has('username'))
-                                            <span class="text-danger">Username is required.</span>
-                                        @endif
                                     </div>
 
-                                    <!-- Email Field -->
+                                    <!-- Email -->
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="email">Email</label>
                                         <input type="email" class="form-control @error('email') is-invalid @enderror"
@@ -86,9 +77,9 @@
                                         @enderror
                                     </div>
 
-                                    <!-- Phone Field -->
+                                    <!-- Telepon -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="phone">Phone</label>
+                                        <label class="form-label" for="phone">Telepon</label>
                                         <input type="text" class="form-control @error('phone') is-invalid @enderror"
                                             id="phone" name="phone" value="{{ old('phone') }}">
                                         @error('phone')
@@ -98,12 +89,12 @@
                                         @enderror
                                     </div>
 
-                                    <!-- Division Field -->
+                                    <!-- Divisi -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="division_id">Division</label>
+                                        <label class="form-label" for="division_id">Divisi</label>
                                         <select class="form-control @error('division_id') is-invalid @enderror"
                                             id="division_id" name="division_id">
-                                            <option value="" selected>Choose division...</option>
+                                            <option value="" selected>Pilih divisi...</option>
                                             @foreach ($divisions as $division)
                                                 <option value="{{ $division->id }}"
                                                     {{ old('division_id') == $division->id ? 'selected' : '' }}>
@@ -117,15 +108,15 @@
                                         @enderror
                                     </div>
 
-                                    <!-- Status Field -->
+                                    <!-- Status -->
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="status">Status</label>
                                         <select name="status" id="status"
                                             class="form-select @error('status') is-invalid @enderror">
-                                            <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active
+                                            <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Aktif
                                             </option>
                                             <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>
-                                                Inactive</option>
+                                                Tidak Aktif</option>
                                         </select>
                                         @error('status')
                                             <span class="invalid-feedback" role="alert">
@@ -134,9 +125,9 @@
                                         @enderror
                                     </div>
 
-                                    <!-- Password Field -->
+                                    <!-- Password -->
                                     <div class="form-group mandatory mb-3">
-                                        <label class="form-label" for="password">Password</label>
+                                        <label class="form-label" for="password">Kata Sandi</label>
                                         <input type="password" class="form-control @error('password') is-invalid @enderror"
                                             id="password" name="password">
                                         @error('password')
@@ -146,11 +137,10 @@
                                         @enderror
                                     </div>
 
-                                    <!-- Submit and Reset buttons -->
                                     <div class="row">
                                         <div class="col-12 d-flex justify-content-end">
                                             <button type="reset" class="btn btn-light-secondary me-1 mb-1">Reset</button>
-                                            <button type="submit" class="btn btn-primary me-1 mb-1">Submit</button>
+                                            <button type="submit" class="btn btn-primary me-1 mb-1">Kirim</button>
                                         </div>
                                     </div>
                                 </form>

@@ -4,6 +4,7 @@ namespace Modules\Risk\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\Risk\Models\Risk;
+use Modules\User\Models\User; // Add this line to reference the User model
 
 class RiskFactory extends Factory
 {
@@ -165,6 +166,10 @@ class RiskFactory extends Factory
             'journal_description' => $this->faker->paragraph,
             'date_stamp' => $this->faker->dateTimeThisYear(),
             'document' => $this->faker->filePath(),
+
+            // User and Division
+            'user_id' => User::inRandomOrder()->first()->id, // Get a random user_id from the users table
+            'division_id' => $this->faker->numberBetween(1, 10),
         ];
     }
 }

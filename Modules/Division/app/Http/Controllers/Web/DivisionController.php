@@ -14,23 +14,41 @@ use Illuminate\Support\Facades\Log;
 
 class DivisionController extends Controller
 {
+    /**
+     * Get pagination limit from request or saved settings
+     */
+    protected function getLimit(Request $request, $savedSettings)
+    {
+        $limits = [10, 25, 50, 100];
+        $limit = $request->get('limit', $savedSettings->limit ?? $limits[0]);
+        return in_array($limit, $limits) ? $limit : $limits[0];
+    }
+
     public function index(Request $request)
     {
+        // Get saved table settings
         $savedSettings = $this->_getTableSettingsForModel(Division::class);
 
-        $limits = [5, 10, 20, 50, 100];
-        $limit = $request->get('limit', $savedSettings->limit ?? 10);
+        // Define pagination limits
+        $limits = [10, 25, 50, 100];
+
+        // Get current limit, sort column and order
+        $limit = $this->getLimit($request, $savedSettings);
         $sortBy = $request->get('sort_by', $savedSettings->sort_by ?? 'name');
         $sortOrder = $request->get('sort_order', $savedSettings->sort_order ?? 'ASC');
 
+        // Get columns configuration
         [$allColumns, $visibleColumns] = $this->_getColumnsForTable();
 
+        // Define excluded sort columns
         $excludedSortColumns = ['created_at', 'updated_at'];
 
+        // Build query
         $query = Division::query();
 
-        if ($request->has('search') && !empty($request->search)) {
-            $search = $request->search;
+        // Apply search if provided
+        if ($request->has('q') && !empty($request->q)) {
+            $search = $request->q;
             $query->where(function ($q) use ($search, $visibleColumns) {
                 foreach ($visibleColumns as $column) {
                     if (!in_array($column, ['id', 'created_at', 'updated_at'])) {
@@ -40,12 +58,18 @@ class DivisionController extends Controller
             });
         }
 
-        $divisions = $query->orderBy($sortBy, $sortOrder)
-            ->paginate($limit)
-            ->withQueryString();
+        // Apply sorting
+        if (!in_array($sortBy, $excludedSortColumns)) {
+            $query->orderBy($sortBy, $sortOrder);
+        }
 
+        // Get paginated results
+        $divisions = $query->paginate($limit)->withQueryString();
+
+        // Get show numbering setting
         $showNumbering = $savedSettings->show_numbering ?? true;
 
+        // Return view with data
         return view('division::index', compact(
             'divisions',
             'allColumns',
@@ -168,8 +192,8 @@ class DivisionController extends Controller
 
     private function _getColumnsForTable(): array
     {
+        // Mendapatkan kolom yang dapat ditampilkan pada tabel
         $allColumns = TableConstants::DIVISION_TABLE_COLUMNS;
-
         $tableSettings = $this->_getTableSettingsForModel(Division::class);
 
         $visibleColumns = $tableSettings && !empty($tableSettings->visible_columns)

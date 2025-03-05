@@ -36,6 +36,9 @@ class TableConstants
 
     public const RISK_TABLE_COLUMNS = [
         'id',
+        'reporters_name',
+        'reporters_position',
+        'contact_no',
         'risk_name',
         'risk_description',
         'risk_status',
@@ -80,6 +83,8 @@ class TableConstants
         'journal_description',
         'date_stamp',
         'document',
+        'user_name',
+        'division_name',
         'created_at',
         'updated_at',
         'deleted_at',

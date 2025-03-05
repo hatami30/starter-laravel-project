@@ -3,15 +3,28 @@
 namespace Modules\Risk\Models;
 
 use Modules\User\Models\User;
-// use Spatie\Permission\Models\Role;
+use Modules\Division\Models\Division;
+use App\Models\TableSettings;
+use Carbon\Carbon;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Risk\Database\Factories\RiskFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Yogameleniawan\SearchSortEloquent\Traits\Searchable;
+use Yogameleniawan\SearchSortEloquent\Traits\Sortable;
 
 class Risk extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, Notifiable, Searchable, Sortable, SoftDeletes;
+
+    /**
+     * Menentukan factory untuk model ini
+     */
+    protected static function newFactory(): RiskFactory
+    {
+        return RiskFactory::new();
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -19,6 +32,8 @@ class Risk extends Model
      * Menambahkan kolom-kolom yang bisa diisi secara massal
      */
     protected $fillable = [
+        'user_id',           // Ensure this is included
+        'division_id',
         'reporters_name',
         'reporters_position',
         'contact_no',
@@ -65,7 +80,7 @@ class Risk extends Model
         'journal_type',
         'journal_description',
         'date_stamp',
-        'document'
+        'document',
     ];
 
     /**
@@ -85,17 +100,23 @@ class Risk extends Model
     ];
 
     /**
-     * Menentukan factory untuk model ini
+     * Relasi dengan Division (Divisi terkait)
      */
-    protected static function newFactory(): RiskFactory
+    public function division()
     {
-        return RiskFactory::new();
+        return $this->belongsTo(Division::class);
+    }
+
+    /**
+     * Relasi dengan User yang melaporkan risiko (user_id)
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);  // This establishes the relationship with the User model
     }
 
     /**
      * Relasi dengan User untuk accountable_manager
-     * 
-     * Misalkan kita ingin menghubungkan kolom 'accountable_manager' dengan model 'User'
      */
     // public function accountableManager()
     // {
@@ -103,28 +124,74 @@ class Risk extends Model
     // }
 
     /**
+     * Relasi dengan User untuk responsible_supervisor
+     */
+    // public function responsibleSupervisor()
+    // {
+    //     return $this->belongsTo(User::class, 'responsible_supervisor');
+    // }
+
+    /**
      * Fungsi untuk memeriksa apakah risiko perlu ditinjau ulang berdasarkan tanggal tinjauan
      */
-    public function isDueForReview()
-    {
-        return $this->next_review_date <= now();
-    }
+    // public function isDueForReview()
+    // {
+    //     return $this->next_review_date <= now();
+    // }
 
     /**
      * Fungsi untuk memeriksa apakah risiko membutuhkan tindakan lebih lanjut
      */
-    public function needsAction()
-    {
-        return $this->risk_status !== 'Closed';
-    }
+    // public function needsAction()
+    // {
+    //     return $this->risk_status !== 'Closed';
+    // }
 
+    /**
+     * Fungsi untuk memeriksa apakah risiko sudah selesai
+     */
+    // public function isCompleted()
+    // {
+    //     return $this->completed_on !== null;
+    // }
+
+    /**
+     * Formatkan nama risiko untuk ditampilkan
+     */
     public function getFormattedNameAttribute()
     {
-        return strtoupper($this->name);
+        return strtoupper($this->risk_name);
     }
 
-    // public function roles()
+    /**
+     * Formatkan created_at untuk tampilan
+     */
+    // public function getCreatedAtAttribute($value)
     // {
-    //     return $this->belongsToMany(Role::class);
+    //     return Carbon::parse($value)->format('F d, Y h:i A');
+    // }
+
+    /**
+     * Formatkan updated_at untuk tampilan
+     */
+    // public function getUpdatedAtAttribute($value)
+    // {
+    //     return Carbon::parse($value)->format('F d, Y h:i A');
+    // }
+
+    /**
+     * Formatkan deleted_at untuk tampilan
+     */
+    // public function getDeletedAtAttribute($value)
+    // {
+    //     return $value ? Carbon::parse($value)->format('F d, Y h:i A') : null;
+    // }
+
+    /**
+     * Relasi dengan pengaturan tabel
+     */
+    // public function tableSettings()
+    // {
+    //     return $this->hasOne(TableSettings::class);
     // }
 }

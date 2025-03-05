@@ -23,6 +23,7 @@
                             <div class="card-header d-flex justify-content-end align-items-center">
 
                                 <div class="d-flex align-items-center">
+
                                     <!-- Cog Icon as Modal Button -->
                                     <button type="button" class="btn border-0 p-0 me-3" data-bs-toggle="modal"
                                         data-bs-target="#tableSettingsModal">
@@ -43,6 +44,7 @@
                                                 <div class="modal-body">
                                                     <form method="POST" action="{{ route('users.save.table.settings') }}">
                                                         @csrf
+
                                                         <!-- Columns Visibility -->
                                                         <h6 class="fw-bold">Visibilitas Kolom</h6>
                                                         <p class="text-muted">Pilih kolom yang ingin Anda tampilkan di
@@ -123,6 +125,7 @@
                                                 </div>
                                                 <div class="modal-body">
                                                     <form method="GET" action="{{ route('users.index') }}">
+
                                                         <!-- Search Input -->
                                                         <div class="mb-3">
                                                             <label for="search" class="fw-bold">Cari:</label>
@@ -212,6 +215,7 @@
                                 </div>
                             </div>
                             <div class="card-body">
+
                                 <!-- Table with outer spacing -->
                                 <div class="table-responsive">
                                     <table class="table table-lg">
@@ -239,7 +243,6 @@
                                                             @if ($column === 'division_name')
                                                                 {{ $user->division->name ?? 'N/A' }}
                                                             @elseif ($column === 'status')
-                                                                <!-- Menambahkan status active dan inactive dengan warna hijau dan merah -->
                                                                 @if ($user->status === 'active')
                                                                     <span class="badge bg-success text-white">Active</span>
                                                                 @else
@@ -252,6 +255,7 @@
                                                         </td>
                                                     @endforeach
                                                     <td>
+
                                                         <!-- Active Status -->
                                                         @if (Auth::user()->can('edit_users') || Auth::user()->can('delete_users'))
                                                             <div class="d-flex gap-2">
@@ -282,6 +286,7 @@
                                                 </tr>
                                             @empty
                                                 <tr>
+
                                                     <!-- Calculate the colspan dynamically -->
                                                     <td class="text-center"
                                                         colspan="{{ count($visibleColumns) + ($savedSettings->show_numbering ?? false ? 2 : 1) }}">
@@ -292,6 +297,7 @@
                                         </tbody>
                                     </table>
                                 </div>
+
                                 <!-- Pagination links -->
                                 <div class="row">
                                     <div class="col-12 d-flex justify-content-end">
@@ -305,6 +311,7 @@
             </div>
         </section>
         <!-- Basic Tables end -->
+
     </div>
 @endsection
 
