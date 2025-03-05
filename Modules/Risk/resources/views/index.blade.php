@@ -16,7 +16,7 @@
                                 @if ($canViewAllRisks)
                                     <span class="badge bg-success ms-1">Akses: Semua Risiko</span>
                                 @else
-                                    <span class="badge bg-info ms-1">Akses: Risiko Divisi Sendiri</span>
+                                    {{-- <span class="badge bg-info ms-1">Akses: Risiko Divisi Sendiri</span> --}}
                                 @endif
                             </div>
                         </div>

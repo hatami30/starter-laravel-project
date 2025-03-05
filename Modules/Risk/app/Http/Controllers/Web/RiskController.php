@@ -37,7 +37,7 @@ class RiskController extends Controller
             $roles = $this->roleModel->all();
             $user = Auth::user();
 
-            // Handle the case where the user might not have a division assigned
+            // Ensure user is authenticated and has a division
             if (!$user || !$user->division) {
                 Log::warning('User without division tried to access risks index', [
                     'user_id' => $user ? $user->id : 'not authenticated'
@@ -51,16 +51,14 @@ class RiskController extends Controller
             $sortBy = $request->get('sort_by', 'risk_name');
             $sortOrder = $request->get('sort_order', 'ASC');
 
-            // Get columns for the table
             [$allColumns, $visibleColumns] = $this->getColumnsForTable();
             $excludedColumns = [];
             $queryColumns = array_diff($visibleColumns, $excludedColumns);
 
             // Start building the query
-            $risksQuery = $this->riskModel
-                ->with(['user', 'division']); // Eager load relationships
+            $risksQuery = $this->riskModel->with(['user', 'division']); // Eager load relationships
 
-            // Access control based on division:
+            // Restrict access based on division
             $isQualityDivision = $user->division->name === 'Mutu' || $user->division->name === 'Quality';
 
             if (!$isQualityDivision) {
@@ -72,7 +70,7 @@ class RiskController extends Controller
                     'division_name' => $user->division->name
                 ]);
             } else {
-                // Quality division can see all risks
+                // Quality division users can see all risks
                 Log::info('Quality division user accessing all risks', [
                     'user_id' => $user->id
                 ]);
@@ -85,7 +83,7 @@ class RiskController extends Controller
             // Paginate the results
             $risks = $this->paginateRisks($risksQuery, $limit);
 
-            // For debugging: log the results of the query
+            // Debugging log
             Log::debug('Risks query completed', [
                 'total_risks' => $risks->total(),
                 'current_page' => $risks->currentPage(),
