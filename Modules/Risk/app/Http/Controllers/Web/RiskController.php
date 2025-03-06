@@ -233,28 +233,28 @@ class RiskController extends Controller
             // Validasi dan ambil data dari request
             $riskData = $request->validated();
 
-            // Menangani unggah file jika ada
-            if ($request->hasFile('document')) {
-                $file = $request->file('document');
-                $originalFileName = $file->getClientOriginalName();
+            // // Menangani unggah file jika ada
+            // if ($request->hasFile('document')) {
+            //     $file = $request->file('document');
+            //     $originalFileName = $file->getClientOriginalName();
 
-                // Pastikan file disimpan di folder 'documents'
-                $filePath = $file->storeAs('documents', $originalFileName, 'public');
+            //     // Pastikan file disimpan di folder 'documents'
+            //     $filePath = $file->storeAs('documents', $originalFileName, 'public');
 
-                // Menyimpan path file ke dalam data risiko
-                $riskData['document'] = $filePath;
+            //     // Menyimpan path file ke dalam data risiko
+            //     $riskData['document'] = $filePath;
 
-                // Log path file untuk memastikan data sudah ada
-                Log::info('File path saved:', ['file_path' => $filePath]);
-            }
+            //     // Log path file untuk memastikan data sudah ada
+            //     Log::info('File path saved:', ['file_path' => $filePath]);
+            // }
 
-            // Log data risiko sebelum disimpan
-            Log::info('Risk data before saving:', ['riskData' => $riskData]);
+            // // Log data risiko sebelum disimpan
+            // Log::info('Risk data before saving:', ['riskData' => $riskData]);
 
-            // Periksa apakah 'document' ada dalam $riskData
-            if (!isset($riskData['document'])) {
-                Log::error('File path not set in risk data');
-            }
+            // // Periksa apakah 'document' ada dalam $riskData
+            // if (!isset($riskData['document'])) {
+            //     Log::error('File path not set in risk data');
+            // }
 
             // Menetapkan user_id dan division_id
             $userId = Auth::id();
@@ -302,34 +302,34 @@ class RiskController extends Controller
             // Validasi dan ambil data dari request
             $riskData = $request->validated();
 
-            // Menangani unggah file jika ada
-            if ($request->hasFile('document')) {
-                // Hapus file lama jika ada
-                if ($risk->document) {
-                    Storage::disk('public')->delete($risk->document);
-                }
+            // // Menangani unggah file jika ada
+            // if ($request->hasFile('document')) {
+            //     // Hapus file lama jika ada
+            //     if ($risk->document) {
+            //         Storage::disk('public')->delete($risk->document);
+            //     }
 
-                // Menyimpan file baru
-                $file = $request->file('document');
-                $originalFileName = $file->getClientOriginalName();
+            //     // Menyimpan file baru
+            //     $file = $request->file('document');
+            //     $originalFileName = $file->getClientOriginalName();
 
-                // Simpan file di folder 'documents'
-                $filePath = $file->storeAs('documents', $originalFileName, 'public');
+            //     // Simpan file di folder 'documents'
+            //     $filePath = $file->storeAs('documents', $originalFileName, 'public');
 
-                // Simpan path file baru ke dalam data risiko
-                $riskData['document'] = $filePath;
+            //     // Simpan path file baru ke dalam data risiko
+            //     $riskData['document'] = $filePath;
 
-                // Log file path untuk memverifikasi apakah sudah benar
-                Log::info('File path saved:', ['file_path' => $filePath]);
-            }
+            //     // Log file path untuk memverifikasi apakah sudah benar
+            //     Log::info('File path saved:', ['file_path' => $filePath]);
+            // }
 
-            // Log data sebelum update ke database
-            Log::info('Risk data before updating:', ['riskData' => $riskData]);
+            // // Log data sebelum update ke database
+            // Log::info('Risk data before updating:', ['riskData' => $riskData]);
 
-            // Periksa apakah 'document' ada dalam $riskData
-            if (!isset($riskData['document'])) {
-                Log::error('File path not set in risk data');
-            }
+            // // Periksa apakah 'document' ada dalam $riskData
+            // if (!isset($riskData['document'])) {
+            //     Log::error('File path not set in risk data');
+            // }
 
             // Update data risiko dengan data baru
             $risk->update($riskData);

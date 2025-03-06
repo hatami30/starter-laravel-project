@@ -977,15 +977,22 @@
                                                 class="form-control @error('document') is-invalid @enderror"
                                                 id="document" name="document" onchange="showFileInfo(this)">
                                             <p class="text-muted mt-1 small" id="fileInfo">
-                                                <i class="bi bi-info-circle me-1"></i>
-                                                Belum ada dokumen. Upload file JPG, PNG, XLSX, CSV, PDF, DOC, atau XLS
-                                                (maks. 10MB)
-                                            </p>
-                                            @if ($risk->document)
-                                                <p class="text-success mt-1 small">
+                                                @if ($risk->document)
                                                     <i class="bi bi-file-earmark me-1"></i>
                                                     Dokumen tersedia: {{ basename($risk->document) }}
-                                                </p>
+                                                @else
+                                                    <i class="bi bi-info-circle me-1"></i>
+                                                    Belum ada dokumen. Upload file JPG, PNG, XLSX, CSV, PDF, DOC, atau XLS
+                                                    (maks. 10MB)
+                                                @endif
+                                            </p>
+                                            @if ($risk->document)
+                                                <div class="mt-2">
+                                                    <a href="{{ asset(Storage::url($risk->document)) }}"
+                                                        class="btn btn-sm btn-info" target="_blank">
+                                                        <i class="bi bi-eye"></i> Lihat Dokumen
+                                                    </a>
+                                                </div>
                                             @endif
                                             @error('document')
                                                 <span class="invalid-feedback" role="alert">
