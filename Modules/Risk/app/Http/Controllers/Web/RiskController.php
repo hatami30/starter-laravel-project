@@ -2,23 +2,25 @@
 
 namespace Modules\Risk\Http\Controllers\Web;
 
+use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use App\Models\TableSettings;
+use Modules\Risk\Models\Risk;
+use Modules\User\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Constants\TableConstants;
+use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Log;
+use Modules\Risk\Models\RiskExport;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use Modules\Division\Models\Division;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\StoreTableSettingsRequest;
 use Modules\Risk\Http\Requests\RiskStoreRequest;
 use Modules\Risk\Http\Requests\RiskUpdateRequest;
-use App\Http\Requests\StoreTableSettingsRequest;
-use Modules\Risk\Models\Risk;
-use Maatwebsite\Excel\Facades\Excel;
-use Modules\Risk\Models\RiskExport;
-use Spatie\Permission\Models\Role;
-use Modules\User\Models\User;
-use Modules\Division\Models\Division;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use App\Models\TableSettings;
-use App\Constants\TableConstants;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class RiskController extends Controller
 {
@@ -37,10 +39,10 @@ class RiskController extends Controller
             $roles = $this->roleModel->all();
             $user = Auth::user();
 
-            // Ensure user is authenticated and has a division
+            // Pastikan pengguna terautentikasi dan memiliki divisi
             if (!$user || !$user->division) {
-                Log::warning('User without division tried to access risks index', [
-                    'user_id' => $user ? $user->id : 'not authenticated'
+                Log::warning('Pengguna tanpa divisi mencoba mengakses halaman risiko', [
+                    'user_id' => $user ? $user->id : 'tidak terautentikasi'
                 ]);
                 return redirect()->route('dashboard.index')
                     ->with('error', 'Anda tidak memiliki divisi yang valid untuk mengakses halaman ini.');
@@ -55,36 +57,35 @@ class RiskController extends Controller
             $excludedColumns = [];
             $queryColumns = array_diff($visibleColumns, $excludedColumns);
 
-            // Start building the query
-            $risksQuery = $this->riskModel->with(['user', 'division']); // Eager load relationships
+            // Mulai membangun query
+            $risksQuery = $this->riskModel->with(['user', 'division']); // Memuat relasi secara eager
 
-            // Restrict access based on division
-            $isQualityDivision = $user->division->name === 'Mutu' || $user->division->name === 'Quality';
+            // Batasi akses berdasarkan divisi
+            $isQualityDivision = $user->division->name === 'Mutu' || $user->division->name === 'Quality' || $user->division->name === 'IT';
 
             if (!$isQualityDivision) {
-                // Non-Quality users can only see risks from their own division
+                // Pengguna non-Quality hanya bisa melihat risiko dari divisi mereka sendiri
                 $risksQuery->where('division_id', $user->division_id);
-                Log::info('User restricted to their own division risks', [
+                Log::info('Pengguna dibatasi hanya untuk risiko divisi mereka sendiri', [
                     'user_id' => $user->id,
                     'division_id' => $user->division_id,
                     'division_name' => $user->division->name
                 ]);
             } else {
-                // Quality division users can see all risks
-                Log::info('Quality division user accessing all risks', [
+                // Pengguna divisi Quality bisa melihat semua risiko
+                Log::info('Pengguna divisi Quality mengakses semua risiko', [
                     'user_id' => $user->id
                 ]);
             }
 
-            // Apply search filter and sorting
+            // Terapkan filter pencarian dan pengurutan
             $risksQuery->when($request->q, fn($query) => $this->applySearchFilter($query, $request, $queryColumns))
                 ->orderBy($sortBy, $sortOrder);
 
-            // Paginate the results
+            // Lakukan paginasi
             $risks = $this->paginateRisks($risksQuery, $limit);
 
-            // Debugging log
-            Log::debug('Risks query completed', [
+            Log::debug('Query risiko selesai', [
                 'total_risks' => $risks->total(),
                 'current_page' => $risks->currentPage(),
                 'per_page' => $risks->perPage()
@@ -100,7 +101,7 @@ class RiskController extends Controller
                 'roles' => $roles,
                 'savedSettings' => $savedSettings,
                 'userDivision' => $user->division->name,
-                'canViewAllRisks' => $isQualityDivision // Flag for Quality division users
+                'canViewAllRisks' => $isQualityDivision // Flag untuk pengguna divisi Quality
             ]);
         } catch (\Exception $e) {
             Log::error('Error in risks index page: ' . $e->getMessage(), [
@@ -229,54 +230,55 @@ class RiskController extends Controller
     public function store(RiskStoreRequest $request)
     {
         try {
-            // Validate and get validated data from the request
+            // Validasi dan ambil data dari request
             $riskData = $request->validated();
 
-            // Log validated data
-            Log::info('Validated Risk Data: ', $riskData);
+            // Menangani unggah file jika ada
+            if ($request->hasFile('document')) {
+                $file = $request->file('document');
+                $originalFileName = $file->getClientOriginalName();
 
-            // Explicitly set required user and division IDs
+                // Pastikan file disimpan di folder 'documents'
+                $filePath = $file->storeAs('documents', $originalFileName, 'public');
+
+                // Menyimpan path file ke dalam data risiko
+                $riskData['document'] = $filePath;
+
+                // Log path file untuk memastikan data sudah ada
+                Log::info('File path saved:', ['file_path' => $filePath]);
+            }
+
+            // Log data risiko sebelum disimpan
+            Log::info('Risk data before saving:', ['riskData' => $riskData]);
+
+            // Periksa apakah 'document' ada dalam $riskData
+            if (!isset($riskData['document'])) {
+                Log::error('File path not set in risk data');
+            }
+
+            // Menetapkan user_id dan division_id
             $userId = Auth::id();
             if (!$userId) {
-                throw new \Exception('No authenticated user found');
+                throw new \Exception('Tidak ada pengguna yang terautentikasi');
             }
 
-            // Set user_id manually (ensure this is in fillable array in Risk model)
             $riskData['user_id'] = $userId;
-
-            // Set division_id with fallback to user's division
             $riskData['division_id'] = $request->get('division_id') ?? Auth::user()->division_id;
-
-            // Set optional fields (ensure reminder_date is nullable if not provided)
             $riskData['reminder_date'] = $request->get('reminder_date') ?: null;
 
-            // Debug data before creating
-            Log::info('Creating risk with data: ', $riskData);
+            // Simpan Risiko baru ke dalam database
+            Risk::create($riskData);
 
-            // Create a new Risk instance and save it explicitly
-            $risk = new Risk();
-            // Loop through each attribute and set it directly
-            foreach ($riskData as $key => $value) {
-                $risk->$key = $value;
-            }
-
-            // Ensure user_id is set again as a safeguard
-            $risk->user_id = $userId;
-
-            // Save the model
-            $risk->save();
-
-            Log::info('Risk created successfully with ID: ' . $risk->id);
-
+            // Redirect ke halaman indeks risiko dengan pesan sukses
             return redirect()->route('risks.index')->with('success', 'Risiko berhasil dibuat.');
         } catch (\Exception $e) {
+            // Log error jika terjadi kesalahan
             Log::error('Error creating risk: ' . $e->getMessage(), [
                 'request_data' => $request->except('_token'),
                 'trace' => $e->getTraceAsString(),
-                'exception' => $e
             ]);
 
-            // Redirect back to the form with more specific error information
+            // Redirect ke halaman form input dengan pesan error
             return redirect()->route('risks.create')
                 ->withInput()
                 ->with('error', 'Gagal membuat risiko: ' . $e->getMessage());
@@ -297,12 +299,53 @@ class RiskController extends Controller
     public function update(RiskUpdateRequest $request, Risk $risk)
     {
         try {
-            $risk->update($request->validated());
+            // Validasi dan ambil data dari request
+            $riskData = $request->validated();
 
+            // Menangani unggah file jika ada
+            if ($request->hasFile('document')) {
+                // Hapus file lama jika ada
+                if ($risk->document) {
+                    Storage::disk('public')->delete($risk->document);
+                }
+
+                // Menyimpan file baru
+                $file = $request->file('document');
+                $originalFileName = $file->getClientOriginalName();
+
+                // Simpan file di folder 'documents'
+                $filePath = $file->storeAs('documents', $originalFileName, 'public');
+
+                // Simpan path file baru ke dalam data risiko
+                $riskData['document'] = $filePath;
+
+                // Log file path untuk memverifikasi apakah sudah benar
+                Log::info('File path saved:', ['file_path' => $filePath]);
+            }
+
+            // Log data sebelum update ke database
+            Log::info('Risk data before updating:', ['riskData' => $riskData]);
+
+            // Periksa apakah 'document' ada dalam $riskData
+            if (!isset($riskData['document'])) {
+                Log::error('File path not set in risk data');
+            }
+
+            // Update data risiko dengan data baru
+            $risk->update($riskData);
+
+            // Redirect ke halaman indeks risiko dengan pesan sukses
             return redirect()->route('risks.index')->with('success', 'Risiko berhasil diperbarui.');
         } catch (\Exception $e) {
-            Log::error('Kesalahan saat memperbarui risiko: ' . $e->getMessage());
-            return redirect()->route('risks.index')->with('error', 'Gagal memperbarui risiko.');
+            // Log error jika terjadi kesalahan
+            Log::error('Error updating risk: ' . $e->getMessage(), [
+                'request_data' => $request->except('_token'),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            // Redirect kembali ke halaman form input dengan pesan error
+            return redirect()->route('risks.index')
+                ->with('error', 'Gagal memperbarui risiko: ' . $e->getMessage());
         }
     }
 

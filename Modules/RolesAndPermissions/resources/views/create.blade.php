@@ -26,7 +26,8 @@
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="role-name">Nama Peran</label>
                                         <input type="text" class="form-control @error('role_name') is-invalid @enderror"
-                                            id="role-name" name="role_name" value="{{ old('role_name') }}">
+                                            id="role-name" name="role_name" placeholder="Masukkan nama peran"
+                                            value="{{ old('role_name') }}">
                                         @error('role_name')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>

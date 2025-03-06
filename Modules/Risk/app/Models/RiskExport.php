@@ -28,8 +28,11 @@ class RiskExport implements FromCollection, WithHeadings, WithStyles, WithTitle,
   {
     return [
       // ['Logo'],
+      [],
+      [],
       ['Risk Report'],
-      ['Nama Penginput: ' . Auth::user()->name],
+      [],
+      // ['Nama Penginput: ' . Auth::user()->name],
       ['Divisi: ' . Auth::user()->division->name],
       // ['Risk Number: ' . $this->risksQuery->first()->id . ' (Unique)', 'Date: ' . now()->format('Y-m-d')],
       [],
@@ -118,7 +121,7 @@ class RiskExport implements FromCollection, WithHeadings, WithStyles, WithTitle,
     $drawing = new Drawing();
     $drawing->setName('Logo');
     $drawing->setDescription('Logo');
-    // $drawing->setPath(public_path('images/logo.png')); // Path to logo image
+    $drawing->setPath(public_path('img/kemenkes-hor.png')); // Path to logo image
     $drawing->setHeight(36);
     $drawing->setCoordinates('A1');
     return $drawing;

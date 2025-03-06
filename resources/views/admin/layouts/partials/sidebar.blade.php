@@ -13,7 +13,7 @@
         //     'permission' => 'view_dashboard',
         //     'new_tab' => false,
         // ],
-        'Menu' => [
+        'Manajemen User' => [
             [
                 'active_route' => 'users.*',
                 'route' => 'users.index',
@@ -38,6 +38,8 @@
                 'permission' => 'view_divisions',
                 'new_tab' => false,
             ],
+        ],
+        'Manajemen Resiko' => [
             [
                 'active_route' => 'risks.*',
                 'route' => 'risks.index',
@@ -55,9 +57,12 @@
         <div class="sidebar-header position-relative">
             <div class="d-flex justify-content-between align-items-center">
 
-                {{-- <!-- Logo -->
-                <div class="logo">
-                    <img src="your-logo.png" alt="Logo" width="40" height="40">
+                <!-- Logo -->
+                {{-- <div class="logo">
+                    <a href="{{ route('dashboard.index') }}">
+                        <img src="{{ asset('img/kemenkes-hor.png') }}" alt="Logo" class="img-fluid"
+                            style="max-height: 60px; max-width: 100%;">
+                    </a>
                 </div> --}}
 
                 <!-- Dark Mode Toggle -->
@@ -110,44 +115,61 @@
                         @endcan
                     @else
                         @if (collect($items)->contains(fn($item) => auth()->user()->can($item['permission'] ?? '')))
-                            <li class="sidebar-title">{{ $key }}</li>
-                            @foreach ($items as $item)
-                                @if (isset($item['submenu']))
-                                    @if (collect($item['submenu'])->contains(
-                                            fn($submenuItem) => auth()->user()->can($submenuItem['permission'] ?? '')))
-                                        <li
-                                            class="sidebar-item has-sub {{ collect($item['submenu'])->contains(fn($submenuItem) => isActive($submenuItem['active_route'])) ? ' active' : '' }}">
-                                            <a href="#" class='sidebar-link'>
-                                                <i class="{{ $item['icon'] }}"></i>
-                                                <span>{{ $item['label'] }}</span>
-                                            </a>
-                                            <ul
-                                                class="submenu {{ collect($item['submenu'])->contains(fn($submenuItem) => isActive($submenuItem['active_route'])) ? 'active' : '' }}">
-                                                @foreach ($item['submenu'] as $submenuItem)
-                                                    @can($submenuItem['permission'] ?? '')
-                                                        <li
-                                                            class="submenu-item {{ isActive($submenuItem['active_route']) ? 'active' : '' }}">
-                                                            <a href="{{ route($submenuItem['route']) }}"
-                                                                class="submenu-link"
-                                                                target="{{ $submenuItem['new_tab'] ? '_blank' : '_self' }}">{{ $submenuItem['label'] }}</a>
-                                                        </li>
-                                                    @endcan
-                                                @endforeach
-                                            </ul>
-                                        </li>
-                                    @endif
-                                @else
-                                    @can($item['permission'] ?? '')
-                                        <li class="sidebar-item{{ isActive($item['active_route']) ? ' active' : '' }}">
-                                            <a href="{{ route($item['route']) }}" class='sidebar-link'
-                                                target="{{ $item['new_tab'] ? '_blank' : '_self' }}">
-                                                <i class="{{ $item['icon'] }}"></i>
-                                                <span>{{ $item['label'] }}</span>
-                                            </a>
-                                        </li>
-                                    @endcan
-                                @endif
-                            @endforeach
+                            @php
+                                $sectionActive = collect($items)->contains(
+                                    fn($item) => isActive($item['active_route']) ||
+                                        (isset($item['submenu']) &&
+                                            collect($item['submenu'])->contains(
+                                                fn($submenuItem) => isActive($submenuItem['active_route']),
+                                            )),
+                                );
+                            @endphp
+                            <li class="sidebar-item has-sub {{ $sectionActive ? 'active' : '' }}">
+                                <a href="#" class="sidebar-link">
+                                    <i class="bi bi-stack"></i>
+                                    <span>{{ $key }}</span>
+                                </a>
+                                <ul class="submenu {{ $sectionActive ? 'active' : '' }}">
+                                    @foreach ($items as $item)
+                                        @if (isset($item['submenu']))
+                                            @if (collect($item['submenu'])->contains(
+                                                    fn($submenuItem) => auth()->user()->can($submenuItem['permission'] ?? '')))
+                                                <li
+                                                    class="sidebar-item has-sub {{ collect($item['submenu'])->contains(fn($submenuItem) => isActive($submenuItem['active_route'])) ? ' active' : '' }}">
+                                                    <a href="#" class='sidebar-link'>
+                                                        <i class="{{ $item['icon'] }}"></i>
+                                                        <span>{{ $item['label'] }}</span>
+                                                    </a>
+                                                    <ul
+                                                        class="submenu {{ collect($item['submenu'])->contains(fn($submenuItem) => isActive($submenuItem['active_route'])) ? 'active' : '' }}">
+                                                        @foreach ($item['submenu'] as $submenuItem)
+                                                            @can($submenuItem['permission'] ?? '')
+                                                                <li
+                                                                    class="submenu-item {{ isActive($submenuItem['active_route']) ? 'active' : '' }}">
+                                                                    <a href="{{ route($submenuItem['route']) }}"
+                                                                        class="submenu-link"
+                                                                        target="{{ $submenuItem['new_tab'] ? '_blank' : '_self' }}">{{ $submenuItem['label'] }}</a>
+                                                                </li>
+                                                            @endcan
+                                                        @endforeach
+                                                    </ul>
+                                                </li>
+                                            @endif
+                                        @else
+                                            @can($item['permission'] ?? '')
+                                                <li
+                                                    class="submenu-item {{ isActive($item['active_route']) ? 'active' : '' }}">
+                                                    <a href="{{ route($item['route']) }}" class='submenu-link'
+                                                        target="{{ $item['new_tab'] ? '_blank' : '_self' }}">
+                                                        <i class="{{ $item['icon'] }}"></i>
+                                                        <span>{{ $item['label'] }}</span>
+                                                    </a>
+                                                </li>
+                                            @endcan
+                                        @endif
+                                    @endforeach
+                                </ul>
+                            </li>
                         @endif
                     @endif
                 @endforeach

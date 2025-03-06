@@ -194,4 +194,14 @@ class Risk extends Model
     // {
     //     return $this->hasOne(TableSettings::class);
     // }
+
+    /**
+     * Set atribut dokumen
+     */
+    public function setDocumentAttribute($value)
+    {
+        if (is_file($value)) {
+            $this->attributes['document'] = $value->store('documents', 'public');
+        }
+    }
 }

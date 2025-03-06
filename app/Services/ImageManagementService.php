@@ -21,26 +21,30 @@ class ImageManagementService
         $folder = $options['folder'] ?? null;
 
         if ($disk === EnumFileSystemDisk::PUBLIC ->value) {
+            // Handle file deletion if current image exists
             if ($currentImagePath && Storage::disk('public')->exists($currentImagePath)) {
                 Storage::disk('public')->delete($currentImagePath);
             }
 
-            $imagePath = $file->store($folder, 'public');
-            return $imagePath;
-
+            // Store new file and return its path
+            return $file->store($folder, 'public');
         } elseif ($disk === EnumFileSystemDisk::PUBLIC_UPLOADS->value) {
             $directory = $this->publicUploadsPath($folder);
 
+            // Create directory if it doesn't exist
             if (!File::exists($directory)) {
                 File::makeDirectory($directory, 0755, true);
             }
 
+            // Generate unique file name to avoid conflicts
             $fileName = time() . '.' . $file->extension();
 
+            // Delete the current image if it exists
             if ($currentImagePath && File::exists($this->publicUploadsPath($currentImagePath))) {
                 File::delete($this->publicUploadsPath($currentImagePath));
             }
 
+            // Move the file to the specified directory
             $file->move($directory, $fileName);
             return $folder . '/' . $fileName;
         }
@@ -52,13 +56,11 @@ class ImageManagementService
     {
         if ($disk === EnumFileSystemDisk::PUBLIC ->value) {
             if ($currentImagePath && Storage::disk('public')->exists($currentImagePath)) {
-                Storage::disk('public')->delete($currentImagePath);
-                return true;
+                return Storage::disk('public')->delete($currentImagePath);
             }
         } elseif ($disk === EnumFileSystemDisk::PUBLIC_UPLOADS->value) {
             if ($currentImagePath && File::exists($this->publicUploadsPath($currentImagePath))) {
-                File::delete($this->publicUploadsPath($currentImagePath));
-                return true;
+                return File::delete($this->publicUploadsPath($currentImagePath));
             }
         }
 

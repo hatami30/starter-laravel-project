@@ -25,13 +25,13 @@
                                     <!-- Pemilihan Peran -->
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="role_id">Peran</label>
-                                        <select class="form-control @error('role_id') is-invalid @enderror" id="role_id"
+                                        <select class="form-select @error('role_id') is-invalid @enderror" id="role_id"
                                             name="role_id">
                                             <option value="" selected>Pilih peran...</option>
                                             @foreach ($roles as $role)
                                                 <option value="{{ $role->id }}"
-                                                    {{ old('role_id') == $role->id ? 'selected' : '' }}>{{ $role->name }}
-                                                </option>
+                                                    {{ old('role_id') == $role->id ? 'selected' : '' }}>
+                                                    {{ $role->name }}</option>
                                             @endforeach
                                         </select>
                                         @error('role_id')
@@ -45,7 +45,8 @@
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="name">Nama</label>
                                         <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                            id="name" name="name" value="{{ old('name') }}">
+                                            id="name" name="name" placeholder="Masukkan nama"
+                                            value="{{ old('name') }}">
                                         @error('name')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -57,7 +58,8 @@
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="username">Username</label>
                                         <input type="text" class="form-control @error('username') is-invalid @enderror"
-                                            id="username" name="username" value="{{ old('username') }}" required>
+                                            id="username" name="username"
+                                            placeholder="Masukkan username"value="{{ old('username') }}" required>
                                         @error('username')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -69,7 +71,8 @@
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="email">Email</label>
                                         <input type="email" class="form-control @error('email') is-invalid @enderror"
-                                            id="email" name="email" value="{{ old('email') }}">
+                                            id="email" name="email" placeholder="Masukkan email"
+                                            value="{{ old('email') }}">
                                         @error('email')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -81,7 +84,8 @@
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="phone">Telepon</label>
                                         <input type="text" class="form-control @error('phone') is-invalid @enderror"
-                                            id="phone" name="phone" value="{{ old('phone') }}">
+                                            id="phone" name="phone" placeholder="Masukkan telepon"
+                                            value="{{ old('phone') }}">
                                         @error('phone')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -92,7 +96,7 @@
                                     <!-- Divisi -->
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="division_id">Divisi</label>
-                                        <select class="form-control @error('division_id') is-invalid @enderror"
+                                        <select class="form-select @error('division_id') is-invalid @enderror"
                                             id="division_id" name="division_id">
                                             <option value="" selected>Pilih divisi...</option>
                                             @foreach ($divisions as $division)
@@ -111,10 +115,11 @@
                                     <!-- Status -->
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="status">Status</label>
-                                        <select name="status" id="status"
-                                            class="form-select @error('status') is-invalid @enderror">
-                                            <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Aktif
-                                            </option>
+                                        <select class="form-select @error('status') is-invalid @enderror" id="status"
+                                            name="status">
+                                            <option value="" selected>Pilih status...</option>
+                                            <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>
+                                                Aktif</option>
                                             <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>
                                                 Tidak Aktif</option>
                                         </select>
@@ -129,7 +134,7 @@
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="password">Kata Sandi</label>
                                         <input type="password" class="form-control @error('password') is-invalid @enderror"
-                                            id="password" name="password">
+                                            id="password" placeholder="Masukkan kata sandi" name="password">
                                         @error('password')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -139,7 +144,8 @@
 
                                     <div class="row">
                                         <div class="col-12 d-flex justify-content-end">
-                                            <button type="reset" class="btn btn-light-secondary me-1 mb-1">Reset</button>
+                                            <button type="reset"
+                                                class="btn btn-light-secondary me-1 mb-1">Reset</button>
                                             <button type="submit" class="btn btn-primary me-1 mb-1">Kirim</button>
                                         </div>
                                     </div>

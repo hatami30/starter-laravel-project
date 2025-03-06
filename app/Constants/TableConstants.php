@@ -87,7 +87,7 @@ class TableConstants
         'division_name',
         'created_at',
         'updated_at',
-        'deleted_at',
+        // 'deleted_at',
     ];
 
     // Add more table columns as needed

@@ -27,7 +27,8 @@
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="role-name">Nama Peran</label>
                                         <input type="text" class="form-control @error('role_name') is-invalid @enderror"
-                                            id="role-name" name="role_name" value="{{ old('role_name', $role->name) }}">
+                                            id="role-name" name="role_name" placeholder="Masukkan nama peran"
+                                            value="{{ old('role_name', $role->name) }}">
                                         @error('role_name')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -112,8 +113,9 @@
 
                                     <div class="row">
                                         <div class="col-12 d-flex justify-content-end">
-                                            <button type="reset" class="btn btn-light-secondary me-1 mb-1">Reset</button>
-                                            <button type="submit" class="btn btn-primary me-1 mb-1">Kirim</button>
+                                            <a href="{{ route('roles.and.permissions.index') }}"
+                                                class="btn btn-light-secondary me-1 mb-1">Batal</a>
+                                            <button type="submit" class="btn btn-primary me-1 mb-1">Perbarui</button>
                                         </div>
                                     </div>
                                 </form>

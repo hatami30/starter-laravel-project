@@ -14,7 +14,7 @@
                             <div class="float-end">
                                 <span class="badge bg-primary">Divisi: {{ $userDivision }}</span>
                                 @if ($canViewAllRisks)
-                                    <span class="badge bg-success ms-1">Akses: Semua Risiko</span>
+                                    {{-- <span class="badge bg-success ms-1">Akses: Semua Risiko</span> --}}
                                 @else
                                     {{-- <span class="badge bg-info ms-1">Akses: Risiko Divisi Sendiri</span> --}}
                                 @endif
@@ -243,37 +243,48 @@
                                                         </td>
                                                     @endforeach
                                                     <td>
-                                                        @if (Auth::user()->can('edit_risks') || Auth::user()->can('delete_risks') || Auth::user()->can('view_risks'))
-                                                            <div class="d-flex gap-2">
-                                                                @can('edit_risks', $risk)
-                                                                    <a href="{{ route('risks.edit', $risk->id) }}"
-                                                                        class="btn btn-sm btn-outline-warning d-flex justify-content-center align-items-center p-0"
-                                                                        style="width: 36px; height: 36px;">
-                                                                        <i class="bx bx-edit"></i>
-                                                                    </a>
-                                                                @endcan
-                                                                @can('delete_risks', $risk)
-                                                                    <form method="POST"
-                                                                        action="{{ route('risks.destroy', $risk->id) }}"
-                                                                        style="margin: 0;" class="delete-form">
-                                                                        @csrf
-                                                                        @method('DELETE')
-                                                                        <button type="button"
-                                                                            class="btn btn-sm btn-outline-danger d-flex justify-content-center align-items-center p-0 delete-btn"
-                                                                            style="width: 36px; height: 36px;">
-                                                                            <i class="bx bx-trash"></i>
-                                                                        </button>
-                                                                    </form>
-                                                                @endcan
-                                                                @can('view_risks', $risk)
-                                                                    {{-- <a href="{{ route('risks.view.pdf', $risk->id) }}"
-                                                                        class="btn btn-sm btn-outline-info d-flex justify-content-center align-items-center p-0"
-                                                                        style="width: 36px; height: 36px;">
-                                                                        <i class="bx bx-show"></i>
-                                                                    </a> --}}
-                                                                @endcan
-                                                            </div>
-                                                        @endif
+                                                        <div class="d-flex justify-content-center gap-2">
+                                                            <!-- Tombol Download -->
+                                                            @if ($risk->document)
+                                                                <a href="{{ asset('storage/' . $risk->document) }}"
+                                                                    class="btn btn-sm btn-outline-info d-flex justify-content-center align-items-center p-0"
+                                                                    style="width: 36px; height: 36px;"
+                                                                    title="Download Document" download>
+                                                                    <i class="bx bx-download"></i>
+                                                                </a>
+                                                            @else
+                                                                <button type="button"
+                                                                    class="btn btn-sm btn-outline-secondary d-flex justify-content-center align-items-center p-0"
+                                                                    style="width: 36px; height: 36px;" disabled
+                                                                    title="No Document">
+                                                                    <i class="bx bx-download"></i>
+                                                                </button>
+                                                            @endif
+
+                                                            <!-- Tombol Edit -->
+                                                            @can('edit_risks', $risk)
+                                                                <a href="{{ route('risks.edit', $risk->id) }}"
+                                                                    class="btn btn-sm btn-outline-warning d-flex justify-content-center align-items-center p-0"
+                                                                    style="width: 36px; height: 36px;" title="Edit">
+                                                                    <i class="bx bx-edit"></i>
+                                                                </a>
+                                                            @endcan
+
+                                                            <!-- Tombol Delete -->
+                                                            @can('delete_risks', $risk)
+                                                                <form method="POST"
+                                                                    action="{{ route('risks.destroy', $risk->id) }}"
+                                                                    style="margin: 0;" class="delete-form">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="button"
+                                                                        class="btn btn-sm btn-outline-danger d-flex justify-content-center align-items-center p-0 delete-btn"
+                                                                        style="width: 36px; height: 36px;" title="Delete">
+                                                                        <i class="bx bx-trash"></i>
+                                                                    </button>
+                                                                </form>
+                                                            @endcan
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             @empty

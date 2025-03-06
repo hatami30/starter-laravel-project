@@ -79,7 +79,7 @@ class RiskStoreRequest extends FormRequest
             'journal_type' => 'required|string|max:255',
             'journal_description' => 'nullable|string|max:1000',
             'date_stamp' => 'nullable|date_format:Y-m-d H:i:s',
-            'document' => 'nullable|file|mimes:pdf,doc,docx,png,jpg,jpeg|max:2048', // Example: accepts file upload
+            'document' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,csv,png,jpg,jpeg|max:10240', // Example: accepts file upload
 
             // User and Division
             'user_id' => 'nullable|exists:users,id',

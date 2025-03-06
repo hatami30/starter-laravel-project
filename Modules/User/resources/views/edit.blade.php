@@ -26,12 +26,12 @@
 
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="role_id">Peran</label>
-                                        <select class="form-control @error('role_id') is-invalid @enderror" id="role_id"
-                                            name="role_id">
+                                        <select name="role_id" id="role_id"
+                                            class="form-select @error('role_id') is-invalid @enderror">
                                             <option value="" disabled>Pilih peran...</option>
                                             @foreach ($roles as $role)
                                                 <option value="{{ $role->id }}"
-                                                    {{ $user->roles->pluck('id')->contains($role->id) ? 'selected' : '' }}>
+                                                    {{ old('role_id', $user->roles->pluck('id')->first()) == $role->id ? 'selected' : '' }}>
                                                     {{ $role->name }}
                                                 </option>
                                             @endforeach
@@ -46,7 +46,8 @@
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="name">Nama</label>
                                         <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                            id="name" name="name" value="{{ old('name', $user->name) }}">
+                                            id="name" name="name" placeholder="Masukkan nama"
+                                            value="{{ old('name', $user->name) }}">
                                         @error('name')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -57,7 +58,8 @@
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="username">Username</label>
                                         <input type="text" class="form-control @error('username') is-invalid @enderror"
-                                            id="username" name="username" value="{{ old('username', $user->username) }}">
+                                            id="username" name="username" placeholder="Masukkan username"
+                                            value="{{ old('username', $user->username) }}">
                                         @error('username')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -80,7 +82,8 @@
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="phone">Telepon</label>
                                         <input type="text" class="form-control @error('phone') is-invalid @enderror"
-                                            id="phone" name="phone" value="{{ old('phone', $user->phone) }}">
+                                            id="phone" name="phone" placeholder="Masukkan telepon"
+                                            value="{{ old('phone', $user->phone) }}">
                                         @error('phone')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -91,12 +94,12 @@
                                     <!-- Field Divisi -->
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="division_id">Divisi</label>
-                                        <select class="form-control @error('division_id') is-invalid @enderror"
-                                            id="division_id" name="division_id">
+                                        <select name="division_id" id="division_id"
+                                            class="form-select @error('division_id') is-invalid @enderror">
                                             <option value="" disabled>Pilih divisi...</option>
                                             @foreach ($divisions as $division)
                                                 <option value="{{ $division->id }}"
-                                                    {{ $user->division_id == $division->id ? 'selected' : '' }}>
+                                                    {{ old('division_id', $user->division_id) == $division->id ? 'selected' : '' }}>
                                                     {{ $division->name }}
                                                 </option>
                                             @endforeach
@@ -113,12 +116,15 @@
                                         <label class="form-label" for="status">Status</label>
                                         <select name="status" id="status"
                                             class="form-select @error('status') is-invalid @enderror">
+                                            <option value="" disabled>Pilih status...</option>
                                             <option value="active"
-                                                {{ old('status', $user->status) == 'active' ? 'selected' : '' }}>Aktif
+                                                {{ old('status', $user->status) == 'active' ? 'selected' : '' }}>
+                                                Aktif
                                             </option>
                                             <option value="inactive"
                                                 {{ old('status', $user->status) == 'inactive' ? 'selected' : '' }}>
-                                                Tidak Aktif</option>
+                                                Tidak Aktif
+                                            </option>
                                         </select>
                                         @error('status')
                                             <span class="invalid-feedback" role="alert">
@@ -131,7 +137,7 @@
                                     <div class="form-group mb-3">
                                         <label class="form-label" for="password">Kata Sandi</label>
                                         <input type="password" class="form-control @error('password') is-invalid @enderror"
-                                            id="password" name="password">
+                                            id="password" placeholder="Masukkan kata sandi" name="password">
                                         <span class="text-muted small">(Kosongkan jika tidak mengubah kata sandi)</span>
                                         @error('password')
                                             <span class="invalid-feedback" role="alert">
