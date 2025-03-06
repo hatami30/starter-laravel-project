@@ -914,7 +914,10 @@
                                         <label class="form-label" for="date_stamp">Stempel Tanggal</label>
                                         <input type="datetime-local"
                                             class="form-control @error('date_stamp') is-invalid @enderror"
-                                            id="date_stamp" name="date_stamp" value="{{ old('date_stamp') }}">
+                                            id="date_stamp" name="date_stamp"
+                                            value="{{ old('date_stamp') ? date('Y-m-d\TH:i', strtotime(old('date_stamp'))) : date('Y-m-d\TH:i') }}">
+                                        <small class="text-muted">Format: YYYY-MM-DD HH:MM</small>
+                                        <input type="hidden" id="formatted_date_stamp" name="formatted_date_stamp">
                                         @error('date_stamp')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>

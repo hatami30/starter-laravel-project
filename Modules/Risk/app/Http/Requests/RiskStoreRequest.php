@@ -78,7 +78,8 @@ class RiskStoreRequest extends FormRequest
             'progress_note' => 'required|string|max:1000',
             'journal_type' => 'required|string|max:255',
             'journal_description' => 'nullable|string|max:1000',
-            'date_stamp' => 'nullable|date_format:Y-m-d H:i:s',
+            'date_stamp' => 'nullable|date_format:Y-m-d\TH:i',
+            'formatted_date_stamp' => 'nullable|date_format:Y-m-d H:i:s',
             'documents' => 'nullable|array', // Allow null or an array
             'documents.*' => 'file|mimes:jpg,jpeg,png,pdf,doc,docx,xlsx,xls,csv|max:10240', // Ensure each file is valid
 
