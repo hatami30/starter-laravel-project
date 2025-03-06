@@ -82,7 +82,7 @@ class TableConstants
         'journal_type',
         'journal_description',
         'date_stamp',
-        'document',
+        'documents',
         'user_name',
         'division_name',
         'created_at',

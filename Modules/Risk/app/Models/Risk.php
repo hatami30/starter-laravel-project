@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 use Modules\Risk\Database\Factories\RiskFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Yogameleniawan\SearchSortEloquent\Traits\Searchable;
@@ -80,7 +81,7 @@ class Risk extends Model
         'journal_type',
         'journal_description',
         'date_stamp',
-        'document',
+        'documents',
     ];
 
     /**
@@ -195,13 +196,40 @@ class Risk extends Model
     //     return $this->hasOne(TableSettings::class);
     // }
 
-    /**
-     * Set atribut dokumen
-     */
-    public function setDocumentAttribute($value)
+    // Automatically handle file uploads and store them as JSON
+    public function setDocumentsAttribute($value)
     {
-        if (is_file($value)) {
-            $this->attributes['document'] = $value->store('documents', 'public');
+        if (is_array($value)) {
+            $filePaths = [];
+
+            // Loop through the array of documents and store each one
+            foreach ($value as $document) {
+                if (is_file($document)) {
+                    $filePaths[] = $document->store('documents', 'public');
+                }
+            }
+
+            // Store the paths of the files as a JSON string
+            $this->attributes['documents'] = json_encode($filePaths);
+        }
+    }
+
+    // Accessor to retrieve documents as an array
+    public function getDocumentsAttribute($value)
+    {
+        // Decode the stored JSON string back into an array of file paths
+        return json_decode($value, true) ?? [];
+    }
+
+    // Additional methods if necessary, for example:
+    // A method to delete old documents when updating
+    public function deleteOldDocuments()
+    {
+        if ($this->documents) {
+            $oldDocuments = json_decode($this->documents, true);
+            foreach ($oldDocuments as $oldDocument) {
+                Storage::disk('public')->delete($oldDocument);
+            }
         }
     }
 }

@@ -79,7 +79,8 @@ class RiskUpdateRequest extends FormRequest
             'journal_type' => 'nullable|string|max:255',
             'journal_description' => 'nullable|string|max:1000',
             'date_stamp' => 'nullable|date_format:Y-m-d H:i:s',
-            'document' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,csv,png,jpg,jpeg|max:10240', // Example: accepts file upload
+            'documents' => 'nullable|array', // Allow null or an array
+            'documents.*' => 'file|mimes:jpg,jpeg,png,pdf,doc,docx,xlsx,xls,csv|max:10240', // Ensure each file is valid
 
             // User and Division
             'user_id' => 'nullable|exists:users,id',
@@ -158,7 +159,7 @@ class RiskUpdateRequest extends FormRequest
             'journal_type' => 'Jenis Jurnal',
             'journal_description' => 'Deskripsi Jurnal',
             'date_stamp' => 'Stempel Waktu',
-            'document' => 'Dokumen',
+            'documents' => 'Dokumen',
             'user_id' => 'ID Pengguna',
             'division_id' => 'ID Divisi',
         ];

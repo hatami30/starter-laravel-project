@@ -245,18 +245,34 @@
                                                     <td>
                                                         <div class="d-flex justify-content-center gap-2">
                                                             <!-- Tombol Download -->
-                                                            @if ($risk->document)
-                                                                <a href="{{ asset('storage/' . $risk->document) }}"
-                                                                    class="btn btn-sm btn-outline-info d-flex justify-content-center align-items-center p-0"
-                                                                    style="width: 36px; height: 36px;"
-                                                                    title="Download Document" download>
-                                                                    <i class="bx bx-download"></i>
-                                                                </a>
+                                                            @if ($risk->documents && count($risk->documents) > 0)
+                                                                <div class="dropdown">
+                                                                    <button
+                                                                        class="btn btn-sm btn-outline-info d-flex justify-content-center align-items-center p-0"
+                                                                        style="width: 36px; height: 36px;" type="button"
+                                                                        id="documentsDropdown{{ $risk->id }}"
+                                                                        data-bs-toggle="dropdown" aria-expanded="false"
+                                                                        title="Documents">
+                                                                        <i class="bx bx-download"></i>
+                                                                    </button>
+                                                                    <ul class="dropdown-menu"
+                                                                        aria-labelledby="documentsDropdown{{ $risk->id }}">
+                                                                        @foreach ($risk->documents as $index => $document)
+                                                                            <li>
+                                                                                <a class="dropdown-item"
+                                                                                    href="{{ asset('storage/' . $document) }}"
+                                                                                    download="Document-{{ $index + 1 }}-{{ $risk->id }}">
+                                                                                    Dokumen {{ $index + 1 }}
+                                                                                </a>
+                                                                            </li>
+                                                                        @endforeach
+                                                                    </ul>
+                                                                </div>
                                                             @else
                                                                 <button type="button"
                                                                     class="btn btn-sm btn-outline-secondary d-flex justify-content-center align-items-center p-0"
                                                                     style="width: 36px; height: 36px;" disabled
-                                                                    title="No Document">
+                                                                    title="No Documents">
                                                                     <i class="bx bx-download"></i>
                                                                 </button>
                                                             @endif

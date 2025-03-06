@@ -970,31 +970,60 @@
                                     </div>
 
                                     <!-- Dokumen -->
-                                    <div class="form-group mb-4">
-                                        <label class="form-label" for="document">Dokumen Pendukung</label>
+                                    <div class="form-group mandatory mb-3">
+                                        <label class="form-label" for="documents">Dokumen Pendukung</label>
                                         <div class="custom-file">
                                             <input type="file"
-                                                class="form-control @error('document') is-invalid @enderror"
-                                                id="document" name="document" onchange="showFileInfo(this)">
-                                            <p class="text-muted mt-1 small" id="fileInfo">
-                                                @if ($risk->document)
-                                                    <i class="bi bi-file-earmark me-1"></i>
-                                                    Dokumen tersedia: {{ basename($risk->document) }}
+                                                class="form-control @error('documents') is-invalid @enderror"
+                                                id="documents" name="documents[]" multiple onchange="showFileInfo(this)">
+
+                                            <div class="mt-2" id="fileInfo">
+                                                @if ($risk->documents)
+                                                    @php
+                                                        $documents = is_array($risk->documents)
+                                                            ? $risk->documents
+                                                            : json_decode($risk->documents);
+                                                    @endphp
+                                                    @if ($documents && count($documents) > 0)
+                                                        <div class="mb-2">
+                                                            <i class="bi bi-file-earmark me-1"></i>
+                                                            <strong>Dokumen saat ini:</strong>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            @foreach ($documents as $index => $document)
+                                                                <div class="d-flex align-items-center mb-2">
+                                                                    <i class="bi bi-file-earmark-text me-2"></i>
+                                                                    <a href="{{ asset(Storage::url($document)) }}"
+                                                                        class="btn btn-sm btn-info me-2" target="_blank">
+                                                                        <i class="bi bi-eye"></i> Lihat
+                                                                    </a>
+                                                                    <span>{{ basename($document) }}</span>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                        <div class="mt-2">
+                                                            <i class="bi bi-info-circle me-1"></i>
+                                                            Upload file baru jika ingin menambah dokumen pendukung
+                                                        </div>
+                                                    @else
+                                                        <div>
+                                                            <i class="bi bi-info-circle me-1"></i>
+                                                            Upload file baru jika ingin menambah dokumen pendukung
+                                                        </div>
+                                                    @endif
                                                 @else
-                                                    <i class="bi bi-info-circle me-1"></i>
-                                                    Belum ada dokumen. Upload file JPG, PNG, XLSX, CSV, PDF, DOC, atau XLS
-                                                    (maks. 10MB)
+                                                    <div>
+                                                        <i class="bi bi-info-circle me-1"></i>
+                                                        Belum ada dokumen. Upload file JPG, PNG, XLSX, CSV, PDF, DOC, atau
+                                                        XLS
+                                                        (maks. 10MB)
+                                                    </div>
                                                 @endif
-                                            </p>
-                                            @if ($risk->document)
-                                                <div class="mt-2">
-                                                    <a href="{{ asset(Storage::url($risk->document)) }}"
-                                                        class="btn btn-sm btn-info" target="_blank">
-                                                        <i class="bi bi-eye"></i> Lihat Dokumen
-                                                    </a>
-                                                </div>
-                                            @endif
-                                            @error('document')
+                                            </div>
+
+                                            <div id="filePreviewContainer" class="mt-2"></div>
+
+                                            @error('documents')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>
                                                 </span>
@@ -1050,77 +1079,152 @@
     </div>
 @endsection
 
-<script>
-    // When document is ready
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize the score display based on current value
-        const initialValue = document.getElementById('residual_score').value;
-        updateScoreValue(initialValue);
-        updateSliderValue(initialValue);
-        updateScoreColor(initialValue);
+@push('scripts')
+    <script>
+        // When document is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the score display based on current value
+            const initialValue = document.getElementById('residual_score').value;
+            updateScoreValue(initialValue);
+            updateSliderValue(initialValue);
+            updateScoreColor(initialValue);
 
-        // Add event listeners for real-time updates
-        document.getElementById('residual_score_slider').addEventListener('input', function() {
-            updateScoreValue(this.value);
-            updateScoreColor(this.value);
+            // Add event listeners for real-time updates
+            document.getElementById('residual_score_slider').addEventListener('input', function() {
+                updateScoreValue(this.value);
+                updateScoreColor(this.value);
+            });
+
+            document.getElementById('residual_score').addEventListener('input', function() {
+                // Enforce min/max boundaries
+                let val = parseInt(this.value);
+                if (isNaN(val)) val = 0;
+                if (val < 0) val = 0;
+                if (val > 100) val = 100;
+
+                this.value = val;
+                updateSliderValue(val);
+                updateScoreColor(val);
+            });
         });
 
-        document.getElementById('residual_score').addEventListener('input', function() {
-            // Enforce min/max boundaries
-            let val = parseInt(this.value);
-            if (isNaN(val)) val = 0;
-            if (val < 0) val = 0;
-            if (val > 100) val = 100;
-
-            this.value = val;
-            updateSliderValue(val);
-            updateScoreColor(val);
-        });
-    });
-
-    function updateScoreValue(val) {
-        document.getElementById('residual_score').value = val;
-    }
-
-    function updateSliderValue(val) {
-        document.getElementById('residual_score_slider').value = val;
-    }
-
-    function updateScoreColor(val) {
-        const scoreInput = document.getElementById('residual_score');
-
-        // Remove any existing color classes
-        scoreInput.classList.remove('bg-danger', 'bg-warning', 'bg-success', 'text-white');
-
-        // Add appropriate color based on value
-        if (val >= 0 && val <= 30) {
-            scoreInput.classList.add('bg-success', 'text-white');
-        } else if (val > 30 && val <= 70) {
-            scoreInput.classList.add('bg-warning');
-        } else if (val > 70) {
-            scoreInput.classList.add('bg-danger', 'text-white');
+        function updateScoreValue(val) {
+            document.getElementById('residual_score').value = val;
         }
-    }
-</script>
-<script>
-    function showFileInfo(input) {
-        const fileInfo = document.getElementById('fileInfo');
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-            const fileSize = (file.size / 1024).toFixed(2);
-            const fileSizeText = fileSize < 1024 ?
-                `${fileSize} KB` :
-                `${(fileSize/1024).toFixed(2)} MB`;
 
-            fileInfo.innerHTML = `
-                <i class="bi bi-file-earmark me-1"></i>
-                ${file.name} (${fileSizeText})
-            `;
-        } else {
-            fileInfo.innerHTML = `
-                <i class="bi bi-info-circle me-1"></i>
-                Belum ada dokumen. Upload file PDF, DOC, atau XLS (maks. 5MB)
-            `;
+        function updateSliderValue(val) {
+            document.getElementById('residual_score_slider').value = val;
         }
-    }
-</script>
+
+        function updateScoreColor(val) {
+            const scoreInput = document.getElementById('residual_score');
+
+            // Remove any existing color classes
+            scoreInput.classList.remove('bg-danger', 'bg-warning', 'bg-success', 'text-white');
+
+            // Add appropriate color based on value
+            if (val >= 0 && val <= 30) {
+                scoreInput.classList.add('bg-success', 'text-white');
+            } else if (val > 30 && val <= 70) {
+                scoreInput.classList.add('bg-warning');
+            } else if (val > 70) {
+                scoreInput.classList.add('bg-danger', 'text-white');
+            }
+        }
+
+        // Handle file input changes
+        function showFileInfo(input) {
+            const fileInfo = document.getElementById('fileInfo');
+            const previewContainer = document.getElementById('filePreviewContainer');
+            previewContainer.innerHTML = ''; // Clear previous previews
+
+            // Create a DataTransfer object to manipulate the FileList
+            const dt = new DataTransfer();
+
+            if (input.files && input.files.length > 0) {
+                // Add all files to our DataTransfer object
+                Array.from(input.files).forEach(file => {
+                    dt.items.add(file);
+                });
+
+                // Update info text
+                fileInfo.innerHTML = `<i class="bi bi-check-circle-fill text-success me-1"></i>
+                                  ${input.files.length} file dipilih`;
+
+                // Create file list preview
+                Array.from(input.files).forEach((file, index) => {
+                    const fileSize = (file.size / 1024).toFixed(2);
+                    const fileSizeText = fileSize < 1024 ?
+                        `${fileSize} KB` :
+                        `${(fileSize/1024).toFixed(2)} MB`;
+
+                    const fileExt = file.name.split('.').pop().toLowerCase();
+                    let iconClass = 'bi-file-earmark';
+
+                    // Set icon based on file type
+                    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExt)) {
+                        iconClass = 'bi-file-earmark-image';
+                    } else if (['pdf'].includes(fileExt)) {
+                        iconClass = 'bi-file-earmark-pdf';
+                    } else if (['doc', 'docx'].includes(fileExt)) {
+                        iconClass = 'bi-file-earmark-word';
+                    } else if (['xls', 'xlsx', 'csv'].includes(fileExt)) {
+                        iconClass = 'bi-file-earmark-excel';
+                    }
+
+                    // Create preview element
+                    const filePreview = document.createElement('div');
+                    filePreview.className =
+                        'border rounded p-2 mb-2 d-flex align-items-center justify-content-between';
+                    filePreview.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <i class="bi ${iconClass} me-2 fs-4"></i>
+                        <div>
+                            <div class="fw-bold">${file.name}</div>
+                            <div class="small text-muted">${fileSizeText}</div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-danger delete-file" data-index="${index}">
+                        <i class="bi bi-x"></i>
+                    </button>
+                `;
+
+                    previewContainer.appendChild(filePreview);
+
+                    // Add delete event handler
+                    const deleteBtn = filePreview.querySelector('.delete-file');
+                    deleteBtn.addEventListener('click', function() {
+                        const fileIndex = parseInt(this.getAttribute('data-index'));
+                        removeFile(fileIndex, input);
+                    });
+                });
+            } else {
+                // If we're in edit mode and there are existing files, keep the current display
+                if (!fileInfo.innerHTML.includes('Dokumen saat ini')) {
+                    fileInfo.innerHTML = `
+                    <i class="bi bi-info-circle me-1"></i>
+                    Belum ada dokumen. Upload file JPG, PNG, XLSX, CSV, PDF, DOC, atau XLS (maks. 10MB)
+                `;
+                }
+            }
+        }
+
+        function removeFile(index, inputElement) {
+            const dt = new DataTransfer();
+            const files = inputElement.files;
+
+            // Add all files except the one to be removed
+            for (let i = 0; i < files.length; i++) {
+                if (i !== index) {
+                    dt.items.add(files[i]);
+                }
+            }
+
+            // Update the input's files
+            inputElement.files = dt.files;
+
+            // Update the preview
+            showFileInfo(inputElement);
+        }
+    </script>
+@endpush
