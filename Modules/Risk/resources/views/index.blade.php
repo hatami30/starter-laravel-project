@@ -259,10 +259,11 @@
                                                                         aria-labelledby="documentsDropdown{{ $risk->id }}">
                                                                         @foreach ($risk->documents as $index => $document)
                                                                             <li>
-                                                                                <a class="dropdown-item"
+                                                                                <a class="dropdown-item d-flex align-items-center"
                                                                                     href="{{ asset('storage/' . $document) }}"
                                                                                     download="Document-{{ $index + 1 }}-{{ $risk->id }}">
-                                                                                    Dokumen {{ $index + 1 }}
+                                                                                    <i
+                                                                                        class='bx bx-file me-2'></i>{{ $index + 1 }}
                                                                                 </a>
                                                                             </li>
                                                                         @endforeach

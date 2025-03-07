@@ -83,9 +83,16 @@
                                     <!-- Telepon -->
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="phone">Telepon</label>
-                                        <input type="text" class="form-control @error('phone') is-invalid @enderror"
-                                            id="phone" name="phone" placeholder="Masukkan telepon"
-                                            value="{{ old('phone') }}">
+                                        <div class="input-group">
+                                            <span class="input-group-text">+62</span>
+                                            <input type="text" class="form-control @error('phone') is-invalid @enderror"
+                                                id="phone" name="phone" placeholder="8123456789"
+                                                value="{{ old('phone') }}"
+                                                oninput="this.value = this.value.replace(/[^0-9]/g, '')" pattern="[0-9]*"
+                                                inputmode="numeric">
+                                        </div>
+                                        <small class="text-muted">Masukkan nomor tanpa angka 0 di depan (contoh:
+                                            8123456789)</small>
                                         @error('phone')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>

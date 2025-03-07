@@ -51,9 +51,17 @@
 
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="contact_no">Nomor Kontak</label>
-                                        <input type="text" class="form-control @error('contact_no') is-invalid @enderror"
-                                            id="contact_no" name="contact_no" placeholder="Masukkan nomor kontak"
-                                            value="{{ old('contact_no') }}">
+                                        <div class="input-group">
+                                            <span class="input-group-text">+62</span>
+                                            <input type="text"
+                                                class="form-control @error('contact_no') is-invalid @enderror"
+                                                id="contact_no" name="contact_no" placeholder="8123456789"
+                                                value="{{ old('contact_no') }}"
+                                                oninput="this.value = this.value.replace(/[^0-9]/g, '')" pattern="[0-9]*"
+                                                inputmode="numeric">
+                                        </div>
+                                        <small class="text-muted">Masukkan nomor tanpa angka 0 di depan (contoh:
+                                            8123456789)</small>
                                         @error('contact_no')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -505,8 +513,6 @@
                                         @enderror
                                     </div>
 
-
-
                                     <div class="form-group mb-3">
                                         <label class="form-label" for="control_cost">Biaya Kontrol</label>
                                         <div class="input-group">
@@ -514,13 +520,16 @@
                                             <input type="text"
                                                 class="form-control @error('control_cost') is-invalid @enderror"
                                                 id="control_cost" name="control_cost" value="{{ old('control_cost') }}"
-                                                placeholder="0">
+                                                placeholder="0"
+                                                oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
+                                                pattern="[0-9]*" inputmode="numeric">
                                             @error('control_cost')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>
                                                 </span>
                                             @enderror
                                         </div>
+                                        <small class="text-muted">Masukkan angka tanpa titik atau koma</small>
                                     </div>
 
 

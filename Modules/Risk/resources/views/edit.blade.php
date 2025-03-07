@@ -54,9 +54,16 @@
 
                                     <div class="form-group mandatory mb-3">
                                         <label class="form-label" for="contact_no">Nomor Kontak</label>
-                                        <input type="text" class="form-control @error('contact_no') is-invalid @enderror"
-                                            id="contact_no" name="contact_no" placeholder="Masukkan nomor kontak"
-                                            value="{{ old('contact_no', $risk->contact_no) }}">
+                                        <div class="input-group">
+                                            <span class="input-group-text">+62</span>
+                                            <input type="text"
+                                                class="form-control @error('contact_no') is-invalid @enderror"
+                                                id="contact_no" name="contact_no" placeholder="8123456789"
+                                                value="{{ old('contact_no', strlen($risk->contact_no) > 0 && substr($risk->contact_no, 0, 3) === '+62' ? substr($risk->contact_no, 3) : $risk->contact_no) }}"
+                                                oninput="this.value = this.value.replace(/[^0-9]/g, '')" pattern="[0-9]*">
+                                        </div>
+                                        <small class="text-muted">Masukkan nomor tanpa angka 0 di depan (contoh:
+                                            8123456789)</small>
                                         @error('contact_no')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -540,13 +547,16 @@
                                             <input type="text"
                                                 class="form-control @error('control_cost') is-invalid @enderror"
                                                 id="control_cost" name="control_cost" placeholder="0"
-                                                value="{{ old('control_cost', $risk->control_cost) }}">
+                                                value="{{ old('control_cost', $risk->control_cost) }}"
+                                                oninput="this.value = this.value.replace(/[^0-9]/g, '')" pattern="[0-9]*"
+                                                inputmode="numeric">
                                             @error('control_cost')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>
                                                 </span>
                                             @enderror
                                         </div>
+                                        <small class="text-muted">Masukkan angka tanpa titik atau koma</small>
                                     </div>
 
                                     <!-- Effective Date -->
@@ -972,7 +982,7 @@
                                     </div>
 
                                     <!-- Dokumen -->
-                                    <div class="form-group mandatory mb-3">
+                                    <div class="form-group mb-3">
                                         <label class="form-label" for="documents">Dokumen Pendukung</label>
                                         <div class="custom-file">
                                             <input type="file"
