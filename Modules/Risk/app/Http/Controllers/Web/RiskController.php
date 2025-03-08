@@ -2,24 +2,22 @@
 
 namespace Modules\Risk\Http\Controllers\Web;
 
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use App\Models\TableSettings;
-use Modules\Risk\Models\Risk;
-use Modules\User\Models\User;
-use Barryvdh\DomPDF\Facade\Pdf;
 use App\Constants\TableConstants;
-use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Log;
-use Modules\Risk\Models\RiskExport;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Maatwebsite\Excel\Facades\Excel;
-use Modules\Division\Models\Division;
-use Illuminate\Support\Facades\Storage;
+use App\Models\TableSettings;
 use App\Http\Requests\StoreTableSettingsRequest;
+use App\Http\Controllers\Controller;
+use Modules\User\Models\User;
+use Modules\Risk\Models\Risk;
+use Modules\Risk\Models\RiskExport;
+use Modules\Division\Models\Division;
 use Modules\Risk\Http\Requests\RiskStoreRequest;
 use Modules\Risk\Http\Requests\RiskUpdateRequest;
+use Spatie\Permission\Models\Role;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class RiskController extends Controller
@@ -31,15 +29,20 @@ class RiskController extends Controller
     {
         $this->roleModel = $role;
         $this->riskModel = $risk;
+        Log::info('RiskController diakses', ['timestamp' => now()->toDateTimeString()]);
     }
 
     public function index(Request $request)
     {
         try {
-            $roles = $this->roleModel->all();
             $user = Auth::user();
+            Log::info('Akses halaman daftar risiko', [
+                'user_id' => $user ? $user->id : 'tidak terautentikasi',
+                'user_name' => $user ? $user->name : 'tidak terautentikasi',
+                'ip_address' => $request->ip(),
+                'division' => $user && $user->division ? $user->division->name : 'tidak ada divisi'
+            ]);
 
-            // Pastikan pengguna terautentikasi dan memiliki divisi
             if (!$user || !$user->division) {
                 Log::warning('Pengguna tanpa divisi mencoba mengakses halaman risiko', [
                     'user_id' => $user ? $user->id : 'tidak terautentikasi'
@@ -48,8 +51,8 @@ class RiskController extends Controller
                     ->with('error', 'Anda tidak memiliki divisi yang valid untuk mengakses halaman ini.');
             }
 
-            $savedSettings = optional($this->getTableSettingsForUser(Risk::class))->limit ?? 10;
-            $limit = $this->getLimit($request, $savedSettings);
+            $tableSettings = $this->getTableSettingsForUser(Risk::class);
+            $limit = $request->get('limit', optional($tableSettings)->limit ?? 10);
             $sortBy = $request->get('sort_by', 'risk_name');
             $sortOrder = $request->get('sort_order', 'ASC');
 
@@ -57,38 +60,14 @@ class RiskController extends Controller
             $excludedColumns = [];
             $queryColumns = array_diff($visibleColumns, $excludedColumns);
 
-            // Mulai membangun query
-            $risksQuery = $this->riskModel->with(['user', 'division']); // Memuat relasi secara eager
-
-            // Batasi akses berdasarkan divisi
-            $isQualityDivision = $user->division->name === 'Mutu' || $user->division->name === 'Quality' || $user->division->name === 'IT';
-
-            if (!$isQualityDivision) {
-                // Pengguna non-Quality hanya bisa melihat risiko dari divisi mereka sendiri
-                $risksQuery->where('division_id', $user->division_id);
-                Log::info('Pengguna dibatasi hanya untuk risiko divisi mereka sendiri', [
-                    'user_id' => $user->id,
-                    'division_id' => $user->division_id,
-                    'division_name' => $user->division->name
-                ]);
-            } else {
-                // Pengguna divisi Quality bisa melihat semua risiko
-                Log::info('Pengguna divisi Quality mengakses semua risiko', [
-                    'user_id' => $user->id
-                ]);
-            }
-
-            // Terapkan filter pencarian dan pengurutan
-            $risksQuery->when($request->q, fn($query) => $this->applySearchFilter($query, $request, $queryColumns))
-                ->orderBy($sortBy, $sortOrder);
-
-            // Lakukan paginasi
+            $risksQuery = $this->buildRisksQuery($user, $request, $queryColumns, $sortBy, $sortOrder);
             $risks = $this->paginateRisks($risksQuery, $limit);
 
-            Log::debug('Query risiko selesai', [
-                'total_risks' => $risks->total(),
-                'current_page' => $risks->currentPage(),
-                'per_page' => $risks->perPage()
+            Log::info('Data risiko berhasil diambil', [
+                'user_id' => $user->id,
+                'jumlah_data' => $risks->count(),
+                'limit' => $limit,
+                'filter_pencarian' => $request->q
             ]);
 
             return view('risk::index', [
@@ -98,13 +77,13 @@ class RiskController extends Controller
                 'visibleColumns' => $visibleColumns,
                 'excludedSortColumns' => $excludedColumns,
                 'limits' => [5, 10, 20, 50, 100],
-                'roles' => $roles,
-                'savedSettings' => $savedSettings,
+                'roles' => $this->roleModel->all(),
+                'savedSettings' => $tableSettings,
                 'userDivision' => $user->division->name,
-                'canViewAllRisks' => $isQualityDivision // Flag untuk pengguna divisi Quality
+                'canViewAllRisks' => $this->isQualityDivision($user)
             ]);
         } catch (\Exception $e) {
-            Log::error('Error in risks index page: ' . $e->getMessage(), [
+            Log::error('Terjadi kesalahan saat memuat daftar risiko: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
             ]);
 
@@ -113,81 +92,66 @@ class RiskController extends Controller
         }
     }
 
-    // Fungsi untuk mengekspor data Risiko ke Excel
+    // Export to Excel (need to improve)
     public function exportToExcel(Request $request)
     {
-        $risksQuery = $this->riskModel
-            ->with(['user', 'division'])
-            ->when($request->q, fn($query) => $this->applySearchFilter($query, $request, TableConstants::RISK_TABLE_COLUMNS))
-            ->orderBy($request->get('sort_by', 'risk_name'), $request->get('sort_order', 'ASC'));
+        $user = Auth::user();
+        Log::info('Permintaan ekspor Excel', [
+            'user_id' => $user ? $user->id : null,
+            'user_name' => $user ? $user->name : null,
+            'filter' => $request->q
+        ]);
 
+        $risksQuery = $this->buildExportQuery($request);
         return Excel::download(new RiskExport($risksQuery), 'risks.xlsx');
     }
 
-    // Fungsi untuk mengekspor data Risiko ke PDF
+    // Export to PDF (need to improve)
     public function exportToPDF(Request $request)
     {
-        $risksQuery = $this->riskModel
-            ->with(['user', 'division'])
-            ->when($request->q, fn($query) => $this->applySearchFilter($query, $request, TableConstants::RISK_TABLE_COLUMNS))
-            ->orderBy($request->get('sort_by', 'risk_name'), $request->get('sort_order', 'ASC'));
+        $user = Auth::user();
+        Log::info('Permintaan ekspor PDF', [
+            'user_id' => $user ? $user->id : null,
+            'user_name' => $user ? $user->name : null,
+            'filter' => $request->q
+        ]);
 
-        $risks = $risksQuery->get();
+        $risks = $this->buildExportQuery($request)->get();
         $pdf = Pdf::loadView('risk::pdf_template', compact('risks'))
             ->setPaper('a4', 'landscape');
 
         return $pdf->download('risks_report.pdf');
     }
 
-    // Fungsi untuk melihat detail risiko dalam bentuk PDF
+    // View PDF (need to improve)
     public function viewPdf(Risk $risk)
     {
-        // Generate the PDF using the risk details
-        $pdf = Pdf::loadView('risk::pdf_template', compact('risk'))
-            ->setPaper('a4', 'portrait');  // Adjust orientation as needed
+        $user = Auth::user();
+        Log::info('Melihat detail risiko dalam PDF', [
+            'risk_id' => $risk->id,
+            'risk_name' => $risk->risk_name,
+            'user_id' => $user ? $user->id : null
+        ]);
 
-        // Return the generated PDF to the browser for download
+        $pdf = Pdf::loadView('risk::pdf_template', compact('risk'))
+            ->setPaper('a4', 'portrait');
+
         return $pdf->download("risk_detail_{$risk->id}.pdf");
     }
 
-    private function applySearchFilter($query, $request, $queryColumns)
-    {
-        $query->where(function ($query) use ($request, $queryColumns) {
-            foreach ($queryColumns as $column) {
-                $query->orWhere("risks.{$column}", 'LIKE', '%' . $request->q . '%');
-            }
-        });
-    }
-
-    private function getLimit(Request $request, $savedSettings)
-    {
-        return $request->get('limit', $savedSettings->limit ?? 10);
-    }
-
-    private function getColumnsForTable(): array
-    {
-        $allColumns = TableConstants::RISK_TABLE_COLUMNS;
-        $tableSettings = $this->getTableSettingsForUser(Risk::class);
-
-        return $tableSettings
-            ? [$allColumns, json_decode($tableSettings->visible_columns, true) ?: $allColumns]
-            : [$allColumns, $allColumns];
-    }
-
-    private function getTableSettingsForUser(string $modelClass)
-    {
-        $user = Auth::user();
-
-        if ($user && $user->tableSettings) {
-            return $user->tableSettings->where('model_name', $modelClass)->first();
-        }
-
-        return null;
-    }
-
+    // Save table settings (need to improve)
     public function saveTableSettings(StoreTableSettingsRequest $request)
     {
-        // Mengubah nilai checkbox 'on' menjadi integer 1, atau null/off menjadi 0
+        $user = Auth::user();
+        Log::info('Menyimpan pengaturan tabel risiko', [
+            'user_id' => $user ? $user->id : null,
+            'pengaturan' => [
+                'kolom_terlihat' => $request->input('visible_columns', []),
+                'limit' => $request->input('limit', 10),
+                'show_numbering' => $request->input('show_numbering') === 'on'
+            ]
+        ]);
+
         $showNumbering = $request->input('show_numbering') === 'on' ? 1 : 0;
 
         TableSettings::updateOrCreate(
@@ -206,19 +170,15 @@ class RiskController extends Controller
         return redirect()->back()->with('success', 'Pengaturan berhasil disimpan!');
     }
 
-    private function paginateRisks($risksQuery, $limit)
-    {
-        return $risksQuery->paginate($limit)->through(fn($risk) => $risk->setAttribute(
-            'user_name',
-            $risk->user ? $risk->user->name : 'Tidak Diketahui'
-        )->setAttribute(
-                'division_name',
-                $risk->division ? $risk->division->name : 'Tidak Ada Divisi'
-            ));
-    }
-
     public function create()
     {
+        $user = Auth::user();
+        Log::info('Akses halaman pembuatan risiko baru', [
+            'user_id' => $user ? $user->id : null,
+            'user_name' => $user ? $user->name : null,
+            'division' => $user && $user->division ? $user->division->name : null
+        ]);
+
         return view('risk::create', [
             'title' => 'Risiko Baru',
             'roles' => $this->roleModel->all(),
@@ -230,28 +190,8 @@ class RiskController extends Controller
     public function store(RiskStoreRequest $request)
     {
         try {
-            // Validasi dan ambil data dari request
             $riskData = $request->validated();
 
-            // // Menangani unggah banyak file jika ada
-            // if ($request->hasFile('documents')) {
-            //     $documents = $request->file('documents');
-            //     $filePaths = [];
-
-            //     // Menyimpan setiap file dan menambahkan path ke array
-            //     foreach ($documents as $document) {
-            //         // Pastikan file disimpan di direktori 'documents' dan public disk
-            //         $filePaths[] = $document->store('documents', 'public');
-            //     }
-
-            //     // Simpan path dokumen sebagai array dalam data risiko
-            //     $riskData['documents'] = json_encode($filePaths);
-            // }
-
-            // // Log data risiko sebelum disimpan
-            // Log::info('Risk data before saving:', ['riskData' => $riskData]);
-
-            // Menetapkan user_id dan division_id
             $userId = Auth::id();
             if (!$userId) {
                 throw new \Exception('Tidak ada pengguna yang terautentikasi');
@@ -261,19 +201,22 @@ class RiskController extends Controller
             $riskData['division_id'] = $request->get('division_id') ?? Auth::user()->division_id;
             $riskData['reminder_date'] = $request->get('reminder_date') ?: null;
 
-            // Simpan Risiko baru ke dalam database
-            Risk::create($riskData);
+            $risk = Risk::create($riskData);
 
-            // Redirect ke halaman indeks risiko dengan pesan sukses
+            Log::info('Risiko baru berhasil dibuat', [
+                'risk_id' => $risk->id,
+                'risk_name' => $risk->risk_name,
+                'user_id' => $userId,
+                'division_id' => $riskData['division_id']
+            ]);
+
             return redirect()->route('risks.index')->with('success', 'Risiko berhasil dibuat.');
         } catch (\Exception $e) {
-            // Log error jika terjadi kesalahan
-            Log::error('Error creating risk: ' . $e->getMessage(), [
+            Log::error('Kesalahan saat membuat risiko: ' . $e->getMessage(), [
                 'request_data' => $request->except('_token'),
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            // Redirect ke halaman form input dengan pesan error
             return redirect()->route('risks.create')
                 ->withInput()
                 ->with('error', 'Gagal membuat risiko: ' . $e->getMessage());
@@ -282,6 +225,13 @@ class RiskController extends Controller
 
     public function edit(Risk $risk)
     {
+        $user = Auth::user();
+        Log::info('Akses halaman edit risiko', [
+            'user_id' => $user ? $user->id : null,
+            'risk_id' => $risk->id,
+            'risk_name' => $risk->risk_name
+        ]);
+
         return view('risk::edit', [
             'title' => 'Edit Risiko',
             'risk' => $risk,
@@ -294,45 +244,26 @@ class RiskController extends Controller
     public function update(RiskUpdateRequest $request, Risk $risk)
     {
         try {
-            // Validasi dan ambil data dari request
-            $riskData = $request->validated();
+            $oldData = $risk->toArray();
+            $risk->update($request->validated());
 
-            // // Menangani unggah banyak file jika ada
-            // if ($request->hasFile('documents')) {
-            //     $documents = $request->file('documents');
-            //     $filePaths = [];
+            Log::info('Risiko berhasil diperbarui', [
+                'risk_id' => $risk->id,
+                'risk_name' => $risk->risk_name,
+                'user_id' => Auth::id(),
+                'perubahan_data' => [
+                    'sebelum' => $oldData,
+                    'sesudah' => $risk->toArray()
+                ]
+            ]);
 
-            //     // Menghapus file lama jika ada
-            //     if ($risk->documents) {
-            //         $oldDocuments = json_decode($risk->documents, true);
-            //         foreach ($oldDocuments as $oldDocument) {
-            //             // Menghapus file lama dari disk jika ada
-            //             Storage::disk('public')->delete($oldDocument);
-            //         }
-            //     }
-
-            //     // Menyimpan setiap file dan menambahkan path ke array
-            //     foreach ($documents as $document) {
-            //         $filePaths[] = $document->store('documents', 'public');
-            //     }
-
-            //     // Simpan path dokumen sebagai array dalam data risiko
-            //     $riskData['documents'] = json_encode($filePaths);
-            // }
-
-            // Update data risiko dengan data baru
-            $risk->update($riskData);
-
-            // Redirect ke halaman indeks risiko dengan pesan sukses
             return redirect()->route('risks.index')->with('success', 'Risiko berhasil diperbarui.');
         } catch (\Exception $e) {
-            // Log error jika terjadi kesalahan
-            Log::error('Error updating risk: ' . $e->getMessage(), [
+            Log::error('Kesalahan saat memperbarui risiko: ' . $e->getMessage(), [
                 'request_data' => $request->except('_token'),
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            // Redirect kembali ke halaman form input dengan pesan error
             return redirect()->route('risks.index')
                 ->with('error', 'Gagal memperbarui risiko: ' . $e->getMessage());
         }
@@ -341,7 +272,16 @@ class RiskController extends Controller
     public function destroy(Risk $risk)
     {
         try {
+            $riskData = $risk->toArray();
             $risk->delete();
+
+            Log::info('Risiko berhasil dihapus', [
+                'risk_id' => $risk->id,
+                'risk_name' => $risk->risk_name,
+                'user_id' => Auth::id(),
+                'data_terhapus' => $riskData
+            ]);
+
             return redirect()->route('risks.index')->with('success', 'Risiko berhasil dihapus.');
         } catch (ModelNotFoundException $e) {
             Log::error('Risiko tidak ditemukan: ' . $e->getMessage());
@@ -350,5 +290,77 @@ class RiskController extends Controller
             Log::error('Kesalahan saat menghapus risiko: ' . $e->getMessage());
             return redirect()->route('risks.index')->with('error', 'Gagal menghapus risiko.');
         }
+    }
+
+    private function isQualityDivision($user): bool
+    {
+        $divisionName = $user->division->name;
+        return in_array($divisionName, ['Mutu', 'Quality', 'IT']);
+    }
+
+    private function buildRisksQuery($user, $request, $queryColumns, $sortBy, $sortOrder)
+    {
+        $risksQuery = $this->riskModel->with(['user', 'division']);
+
+        if (!$this->isQualityDivision($user)) {
+            $risksQuery->where('division_id', $user->division_id);
+        }
+
+        return $risksQuery
+            ->when($request->q, fn($query) => $this->applySearchFilter($query, $request, $queryColumns))
+            ->orderBy($sortBy, $sortOrder);
+    }
+
+    private function buildExportQuery($request)
+    {
+        return $this->riskModel
+            ->with(['user', 'division'])
+            ->when($request->q, fn($query) => $this->applySearchFilter($query, $request, TableConstants::RISK_TABLE_COLUMNS))
+            ->orderBy($request->get('sort_by', 'risk_name'), $request->get('sort_order', 'ASC'));
+    }
+
+    // Apply search filter (need to improve)
+    private function applySearchFilter($query, $request, $queryColumns)
+    {
+        return $query->where(function ($query) use ($request, $queryColumns) {
+            foreach ($queryColumns as $column) {
+                $query->orWhere("risks.{$column}", 'LIKE', '%' . $request->q . '%');
+            }
+        });
+    }
+
+    // Get columns for table (need to improve)
+    private function getColumnsForTable(): array
+    {
+        $allColumns = TableConstants::RISK_TABLE_COLUMNS;
+        $tableSettings = $this->getTableSettingsForUser(Risk::class);
+
+        if (!$tableSettings) {
+            return [$allColumns, $allColumns];
+        }
+
+        $visibleColumns = json_decode($tableSettings->visible_columns, true) ?: $allColumns;
+        return [$allColumns, $visibleColumns];
+    }
+
+    // Get table settings for user (need to improve)
+    private function getTableSettingsForUser(string $modelClass)
+    {
+        $user = Auth::user();
+        if (!$user || !$user->tableSettings) {
+            return null;
+        }
+
+        return $user->tableSettings->where('model_name', $modelClass)->first();
+    }
+
+    // Paginate risks (need to improve)
+    private function paginateRisks($risksQuery, $limit)
+    {
+        return $risksQuery->paginate($limit)->through(function ($risk) {
+            return $risk
+                ->setAttribute('user_name', $risk->user ? $risk->user->name : 'Tidak Diketahui')
+                ->setAttribute('division_name', $risk->division ? $risk->division->name : 'Tidak Ada Divisi');
+        });
     }
 }
