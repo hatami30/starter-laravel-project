@@ -5,14 +5,14 @@
     }
 
     $sidebarMenuLists = [
-        // [
-        //     'active_route' => 'dashboard.*',
-        //     'route' => 'dashboard.index',
-        //     'icon' => 'bx-sm bx bxs-dashboard',
-        //     'label' => 'Dashboard',
-        //     'permission' => 'view_dashboard',
-        //     'new_tab' => false,
-        // ],
+        [
+            'active_route' => 'dashboard.*',
+            'route' => 'dashboard.index',
+            'icon' => 'bx-sm bx bxs-dashboard',
+            'label' => 'Dashboard',
+            'permission' => 'view_dashboard',
+            'new_tab' => false,
+        ],
         'Manajemen User' => [
             [
                 'active_route' => 'users.*',
