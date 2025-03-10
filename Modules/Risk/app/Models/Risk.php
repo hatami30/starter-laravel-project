@@ -4,7 +4,6 @@ namespace Modules\Risk\Models;
 
 use Modules\User\Models\User;
 use Modules\Division\Models\Division;
-use App\Models\TableSettings;
 use Carbon\Carbon;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
@@ -19,21 +18,13 @@ class Risk extends Model
 {
     use HasFactory, Notifiable, Searchable, Sortable, SoftDeletes;
 
-    /**
-     * Menentukan factory untuk model ini
-     */
     protected static function newFactory(): RiskFactory
     {
         return RiskFactory::new();
     }
 
-    /**
-     * The attributes that are mass assignable.
-     * 
-     * Menambahkan kolom-kolom yang bisa diisi secara massal
-     */
     protected $fillable = [
-        'user_id',           // Ensure this is included
+        'user_id',
         'division_id',
         'reporters_name',
         'reporters_position',
@@ -84,9 +75,6 @@ class Risk extends Model
         'documents',
     ];
 
-    /**
-     * Tentukan kolom yang bertipe tanggal dan waktu untuk diproses oleh Carbon
-     */
     protected $dates = [
         'date_opened',
         'next_review_date',
@@ -100,136 +88,63 @@ class Risk extends Model
         'deleted_at',
     ];
 
-    /**
-     * Relasi dengan Division (Divisi terkait)
-     */
     public function division()
     {
         return $this->belongsTo(Division::class);
     }
 
-    /**
-     * Relasi dengan User yang melaporkan risiko (user_id)
-     */
     public function user()
     {
-        return $this->belongsTo(User::class);  // This establishes the relationship with the User model
+        return $this->belongsTo(User::class);
     }
 
-    /**
-     * Relasi dengan User untuk accountable_manager
-     */
-    // public function accountableManager()
-    // {
-    //     return $this->belongsTo(User::class, 'accountable_manager');
-    // }
-
-    /**
-     * Relasi dengan User untuk responsible_supervisor
-     */
-    // public function responsibleSupervisor()
-    // {
-    //     return $this->belongsTo(User::class, 'responsible_supervisor');
-    // }
-
-    /**
-     * Fungsi untuk memeriksa apakah risiko perlu ditinjau ulang berdasarkan tanggal tinjauan
-     */
-    // public function isDueForReview()
-    // {
-    //     return $this->next_review_date <= now();
-    // }
-
-    /**
-     * Fungsi untuk memeriksa apakah risiko membutuhkan tindakan lebih lanjut
-     */
-    // public function needsAction()
-    // {
-    //     return $this->risk_status !== 'Closed';
-    // }
-
-    /**
-     * Fungsi untuk memeriksa apakah risiko sudah selesai
-     */
-    // public function isCompleted()
-    // {
-    //     return $this->completed_on !== null;
-    // }
-
-    /**
-     * Formatkan nama risiko untuk ditampilkan
-     */
     public function getFormattedNameAttribute()
     {
         return strtoupper($this->risk_name);
     }
 
-    /**
-     * Formatkan created_at untuk tampilan
-     */
-    // public function getCreatedAtAttribute($value)
-    // {
-    //     return Carbon::parse($value)->format('F d, Y h:i A');
-    // }
-
-    /**
-     * Formatkan updated_at untuk tampilan
-     */
-    // public function getUpdatedAtAttribute($value)
-    // {
-    //     return Carbon::parse($value)->format('F d, Y h:i A');
-    // }
-
-    /**
-     * Formatkan deleted_at untuk tampilan
-     */
-    // public function getDeletedAtAttribute($value)
-    // {
-    //     return $value ? Carbon::parse($value)->format('F d, Y h:i A') : null;
-    // }
-
-    /**
-     * Relasi dengan pengaturan tabel
-     */
-    // public function tableSettings()
-    // {
-    //     return $this->hasOne(TableSettings::class);
-    // }
-
-    // Automatically handle file uploads and store them as JSON
     public function setDocumentsAttribute($value)
     {
-        if (is_array($value)) {
-            $filePaths = [];
-
-            // Loop through the array of documents and store each one
-            foreach ($value as $document) {
-                if (is_file($document)) {
-                    $filePaths[] = $document->store('documents', 'public');
-                }
-            }
-
-            // Store the paths of the files as a JSON string
-            $this->attributes['documents'] = json_encode($filePaths);
+        if (!is_array($value)) {
+            return;
         }
+
+        $filePaths = [];
+
+        foreach ($value as $document) {
+            if (is_file($document)) {
+                $filePaths[] = $document->store('documents', 'public');
+            }
+        }
+
+        $this->attributes['documents'] = !empty($filePaths) ? json_encode($filePaths) : null;
     }
 
-    // Accessor to retrieve documents as an array
     public function getDocumentsAttribute($value)
     {
-        // Decode the stored JSON string back into an array of file paths
         return json_decode($value, true) ?? [];
     }
 
-    // Additional methods if necessary, for example:
-    // A method to delete old documents when updating
     public function deleteOldDocuments()
     {
-        if ($this->documents) {
-            $oldDocuments = json_decode($this->documents, true);
-            foreach ($oldDocuments as $oldDocument) {
-                Storage::disk('public')->delete($oldDocument);
-            }
+        $oldDocuments = $this->documents;
+
+        if (empty($oldDocuments)) {
+            return;
         }
+
+        foreach ($oldDocuments as $oldDocument) {
+            Storage::disk('public')->delete($oldDocument);
+        }
+    }
+
+    public function isDueForReview()
+    {
+        return $this->next_review_date && $this->next_review_date <= now();
+    }
+
+    public function needsAction()
+    {
+        return $this->risk_status !== 'Closed';
     }
 }
