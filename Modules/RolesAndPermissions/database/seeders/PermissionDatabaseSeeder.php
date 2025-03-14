@@ -48,6 +48,15 @@ class PermissionDatabaseSeeder extends Seeder
             ['name' => 'edit_risks', 'module' => 'risk', 'guard_name' => 'web'],
             ['name' => 'delete_risks', 'module' => 'risk', 'guard_name' => 'web'],
             ['name' => 'update_risk_table_settings', 'module' => 'risk', 'guard_name' => 'web'],
+
+            // Document permissions
+            ['name' => 'view_documents', 'module' => 'document', 'guard_name' => 'web'],
+            ['name' => 'create_documents', 'module' => 'document', 'guard_name' => 'web'],
+            ['name' => 'edit_documents', 'module' => 'document', 'guard_name' => 'web'],
+            ['name' => 'delete_documents', 'module' => 'document', 'guard_name' => 'web'],
+            ['name' => 'update_document_table_settings', 'module' => 'document', 'guard_name' => 'web'],
+            ['name' => 'export_documents_to_excel', 'module' => 'document', 'guard_name' => 'web'],
+            ['name' => 'export_documents_to_pdf', 'module' => 'document', 'guard_name' => 'web'],
         ];
 
         // Create permissions with the module and guard_name columns

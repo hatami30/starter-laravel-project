@@ -13,6 +13,7 @@ class TableHelper
             'roles_and_permissions' => TableConstants::ROLE_AND_PERMISSION_TABLE_COLUMNS,
             'divisions' => TableConstants::DIVISION_TABLE_COLUMNS,
             'risks' => TableConstants::RISK_TABLE_COLUMNS,
+            'documents' => TableConstants::DOCUMENT_TABLE_COLUMNS,
         ];
 
         return $columns[$tableName] ?? [];

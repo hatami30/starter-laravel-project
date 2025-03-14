@@ -165,7 +165,7 @@ return new class extends Migration {
             $table->text('journal_type');  // Required
             $table->text('journal_description')->nullable();  // Nullable
             $table->timestamp('date_stamp')->nullable();  // Nullable
-            $table->json('documents')->nullable();  // Nullable
+            $table->json('file_paths')->nullable();  // Nullable
 
             // Foreign Keys
             $table->foreignId('user_id')->constrained()->onDelete('cascade');  // Required

@@ -47,7 +47,7 @@ class RiskController extends Controller
                 Log::warning('Pengguna tanpa divisi mencoba mengakses halaman risiko', [
                     'user_id' => $user ? $user->id : 'tidak terautentikasi'
                 ]);
-                return redirect()->route('dashboard.index')
+                return redirect()->route('divisions.index')
                     ->with('error', 'Anda tidak memiliki divisi yang valid untuk mengakses halaman ini.');
             }
 
@@ -87,7 +87,7 @@ class RiskController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
 
-            return redirect()->route('dashboard.index')
+            return redirect()->route('risks.index')
                 ->with('error', 'Terjadi kesalahan saat memuat daftar risiko: ' . $e->getMessage());
         }
     }

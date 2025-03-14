@@ -520,8 +520,7 @@
                                             <input type="text"
                                                 class="form-control @error('control_cost') is-invalid @enderror"
                                                 id="control_cost" name="control_cost" value="{{ old('control_cost') }}"
-                                                placeholder="0"
-                                                oninput="this.value = this.value.replace(/[^0-9]/g, '')" 
+                                                placeholder="0" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                                 pattern="[0-9]*" inputmode="numeric">
                                             @error('control_cost')
                                                 <span class="invalid-feedback" role="alert">
@@ -936,11 +935,12 @@
 
                                     <!-- Dokumen -->
                                     <div class="form-group mb-4">
-                                        <label class="form-label" for="documents">Dokumen Pendukung</label>
+                                        <label class="form-label" for="file_paths">Dokumen Pendukung</label>
                                         <div class="custom-file">
                                             <input type="file"
-                                                class="form-control @error('documents') is-invalid @enderror"
-                                                id="documents" name="documents[]" multiple onchange="showFileInfo(this)">
+                                                class="form-control @error('file_paths') is-invalid @enderror"
+                                                id="file_paths" name="file_paths[]" multiple
+                                                onchange="showFileInfo(this)">
 
                                             <div class="mt-2" id="fileInfo">
                                                 <i class="bi bi-info-circle me-1"></i>
@@ -950,7 +950,7 @@
 
                                             <div id="filePreviewContainer" class="mt-2"></div>
 
-                                            @error('documents')
+                                            @error('file_paths')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>
                                                 </span>

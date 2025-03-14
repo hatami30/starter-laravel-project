@@ -245,7 +245,7 @@
                                                     <td>
                                                         <div class="d-flex justify-content-center gap-2">
                                                             <!-- Tombol Download -->
-                                                            @if ($risk->documents && count($risk->documents) > 0)
+                                                            @if ($risk->file_paths && count($risk->file_paths) > 0)
                                                                 <div class="dropdown">
                                                                     <button
                                                                         class="btn btn-sm btn-outline-info d-flex justify-content-center align-items-center p-0"
@@ -257,7 +257,7 @@
                                                                     </button>
                                                                     <ul class="dropdown-menu"
                                                                         aria-labelledby="documentsDropdown{{ $risk->id }}">
-                                                                        @foreach ($risk->documents as $index => $document)
+                                                                        @foreach ($risk->file_paths as $index => $document)
                                                                             <li>
                                                                                 <a class="dropdown-item d-flex align-items-center"
                                                                                     href="{{ asset('storage/' . $document) }}"

@@ -2,16 +2,17 @@
 
 namespace Modules\Division\Models;
 
-use App\Models\TableSettings;
-// use Modules\User\Models\User;
-use Modules\Division\Database\Factories\DivisionFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+// use Modules\User\Models\User;
+use App\Models\TableSettings;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
-use Yogameleniawan\SearchSortEloquent\Traits\Searchable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\DocumentManagement\Models\Document;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Yogameleniawan\SearchSortEloquent\Traits\Sortable;
+use Modules\Division\Database\Factories\DivisionFactory;
+use Yogameleniawan\SearchSortEloquent\Traits\Searchable;
 
 class Division extends Model
 {
@@ -41,6 +42,11 @@ class Division extends Model
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
         ];
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(Document::class);
     }
 
     public function getCreatedAtAttribute($value)

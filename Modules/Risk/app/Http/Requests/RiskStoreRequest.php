@@ -6,43 +6,27 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class RiskStoreRequest extends FormRequest
 {
-    /**
-     * Get the validation rules that apply to the request.
-     */
     public function rules(): array
     {
         return [
-            // Reporter Details
             'reporters_name' => 'required|string|max:255',
             'reporters_position' => 'required|string|max:255',
             'contact_no' => 'required|string|max:20',
-
-            // Risk Details
             'risk_name' => 'required|string|max:255',
             'risk_description' => 'required|string|max:1000',
-
-            // Status
             'risk_status' => 'required|in:Provisional,Open,Open (Not Published),Closed,Re-Opened',
             'date_opened' => 'required|date',
             'next_review_date' => 'required|date',
-
-            // Reminder Period
             'reminder_period' => 'nullable|in:Do Not Send Reminder,On The Due Date,1 day before the Due Date,2 days before the Due Date,3 days before the Due Date,4 days before the Due Date,5 days before the Due Date,6 days before the Due Date,1 week before the Due Date,2 weeks before the Due Date,1 Month (30 Days) before the Due Date,2 Months (60 Days) before the Due Date,3 Months (90 Days) before the Due Date,6 Months (180 Days) before the Due Date,1 Year (365 Days) before the Due Date',
             'reminder_date' => 'nullable|date',
-
-            // Classification
             'type_of_risk' => 'required|in:Corporate Risk,Hospital Risk,Project Risk,Emerging Risk',
             'category' => 'required|in:Business Process and System,Consumer Quality and Safety and Environment,Health and Safety,Reputation and Mission,Service Delivery',
             'location' => 'required|string|max:255',
             'unit' => 'required|string|max:255',
             'relevant_committee' => 'required|in:Antimicroba Resistency Control,Ethics,Health Promotion,Infection Control,MDGs,Medical,Medical Record,Medical Record Extermination,Medical - Ethico Legal,Nursing,Occupational Health and Safety,Pain Management,Patient Safety,Pharmacy and Therapatical,PONEK,Quality,Quality and Patient Safety,TB Dots,Nil',
-
-            // Key Personnel
             'accountable_manager' => 'nullable|string|max:255',
             'responsible_supervisor' => 'nullable|string|max:255',
             'notify_of_associated_incidents' => 'required|in:Yes,No',
-
-            // Causes, Consequences, and Controls
             'causes' => 'required|string|max:1000',
             'consequences' => 'required|string|max:1000',
             'controls' => 'required|string|max:1000',
@@ -54,18 +38,12 @@ class RiskStoreRequest extends FormRequest
             'last_reviewed_on' => 'required|date',
             'assessment' => 'required|in:Review Pending,Review Underway,Ineffective,Partial Effectiveness Only,Effective but should be improved,Effective - No Change Required',
             'overall_control_assessment' => 'required|in:Excellent,Good,Moderate,Poor',
-
-            // Residual Risk
             'residual_consequences' => 'required|string|max:255',
             'residual_likelihood' => 'required|in:Frequent,Likely,Possible,Unlikely,Rare',
             'residual_score' => 'required|numeric',
             'residual_risk' => 'required|string|max:1000',
-
-            // Source of Assurance
             'source_of_assurance' => 'required|string|max:1000',
             'assurance_category' => 'required|in:Activity Throughout,Audit and Finance Committee,Audit Processes,Audit Reports,Claims,Complaints,Credentialling,Education and Training Records,Employee Engagement,External Audit,Finance Report,H&S Committee,Incidents,Inspection Reports,Internal Audit,Key Performance Indicator,Legislative and Regulatory,Milestone Reached,Monitoring,OHS Reports,Project Control,Quality Committee,Recruitment,Retention and Sick Leave Rates',
-
-            // Actions
             'actions' => 'required|string|max:1000',
             'action_assigned_date' => 'required|date',
             'action_by_date' => 'required|date',
@@ -73,27 +51,18 @@ class RiskStoreRequest extends FormRequest
             'allocated_to' => 'nullable|string|max:255',
             'completed_on' => 'nullable|date',
             'action_response' => 'nullable|string|max:1000',
-
-            // Progress Note and Document
             'progress_note' => 'required|string|max:1000',
             'journal_type' => 'required|string|max:255',
             'journal_description' => 'nullable|string|max:1000',
             'date_stamp' => 'nullable|date_format:Y-m-d\TH:i',
             'formatted_date_stamp' => 'nullable|date_format:Y-m-d H:i:s',
-            'documents' => 'nullable|array', // Allow null or an array
-            'documents.*' => 'file|mimes:jpg,jpeg,png,pdf,doc,docx,xlsx,xls,csv|max:10240', // Ensure each file is valid
-
-            // User and Division
+            'documents' => 'nullable|array',
+            'documents.*' => 'file|mimes:jpg,jpeg,png,pdf,doc,docx,xlsx,xls,csv|max:10240',
             'user_id' => 'nullable|exists:users,id',
             'division_id' => 'nullable|exists:divisions,id',
         ];
     }
 
-    /**
-     * Define custom validation messages.
-     *
-     * @return array
-     */
     public function messages(): array
     {
         return [
@@ -108,15 +77,12 @@ class RiskStoreRequest extends FormRequest
         ];
     }
 
-    /**
-     * Define attribute names for validation.
-     *
-     * @return array
-     */
     public function attributes(): array
     {
         return [
             'reporters_name' => 'Nama Pelapor',
+            'reporters_position' => 'Jabatan Pelapor',
+            'contact_no' => 'Nomor Kontak',
             'risk_name' => 'Nama Risiko',
             'risk_description' => 'Deskripsi Risiko',
             'risk_status' => 'Status Risiko',

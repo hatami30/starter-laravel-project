@@ -983,26 +983,27 @@
 
                                     <!-- Dokumen -->
                                     <div class="form-group mb-3">
-                                        <label class="form-label" for="documents">Dokumen Pendukung</label>
+                                        <label class="form-label" for="file_paths">Dokumen Pendukung</label>
                                         <div class="custom-file">
                                             <input type="file"
-                                                class="form-control @error('documents') is-invalid @enderror"
-                                                id="documents" name="documents[]" multiple onchange="showFileInfo(this)">
+                                                class="form-control @error('file_paths') is-invalid @enderror"
+                                                id="file_paths" name="file_paths[]" multiple
+                                                onchange="showFileInfo(this)">
 
                                             <div class="mt-2" id="fileInfo">
-                                                @if ($risk->documents)
+                                                @if ($risk->file_paths)
                                                     @php
-                                                        $documents = is_array($risk->documents)
-                                                            ? $risk->documents
-                                                            : json_decode($risk->documents);
+                                                        $file_paths = is_array($risk->file_paths)
+                                                            ? $risk->file_paths
+                                                            : json_decode($risk->file_paths);
                                                     @endphp
-                                                    @if ($documents && count($documents) > 0)
+                                                    @if ($file_paths && count($file_paths) > 0)
                                                         <div class="mb-2">
                                                             <i class="bi bi-file-earmark me-1"></i>
                                                             <strong>Dokumen saat ini:</strong>
                                                         </div>
                                                         <div class="mb-3">
-                                                            @foreach ($documents as $index => $document)
+                                                            @foreach ($file_paths as $index => $document)
                                                                 <div class="d-flex align-items-center mb-2">
                                                                     <i class="bi bi-file-earmark-text me-2"></i>
                                                                     <a href="{{ asset(Storage::url($document)) }}"
@@ -1035,7 +1036,7 @@
 
                                             <div id="filePreviewContainer" class="mt-2"></div>
 
-                                            @error('documents')
+                                            @error('file_paths')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>
                                                 </span>

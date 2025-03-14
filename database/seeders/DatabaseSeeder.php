@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Modules\Risk\Database\Seeders\RiskDatabaseSeeder;
+// use Modules\Risk\Database\Seeders\RiskDatabaseSeeder;
 use Modules\Roles\Database\Seeders\RolesDatabaseSeeder;
 use Modules\Roles\Models\Role;
 use Modules\Division\Models\Division;
@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
             UserDatabaseSeeder::class,
             PermissionDatabaseSeeder::class,
             RoleDatabaseSeeder::class,
-            RiskDatabaseSeeder::class,
+            // RiskDatabaseSeeder::class,
         ]);
     }
 }

@@ -15,5 +15,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useBootstrap();
+        \View::addNamespace('document', base_path('Modules/DocumentManagement/resources/views'));
     }
 }

@@ -49,6 +49,17 @@
                 'new_tab' => false,
             ],
         ],
+
+        'Manajemen Dokumen' => [
+            [
+                'active_route' => 'documents.*',
+                'route' => 'documents.index',
+                'icon' => 'bx bx-sm bx-file',
+                'label' => 'Document',
+                'permission' => 'view_documents',
+                'new_tab' => false,
+            ],
+        ],
     ];
 @endphp
 

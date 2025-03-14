@@ -82,13 +82,24 @@ class TableConstants
         'journal_type',
         'journal_description',
         'date_stamp',
-        'documents',
+        'file_paths',
         'user_name',
         'division_name',
         'created_at',
         'updated_at',
-        // 'deleted_at',
     ];
 
-    // Add more table columns as needed
+    public const DOCUMENT_TABLE_COLUMNS = [
+        'id',
+        'division_name',
+        'title',
+        'category',
+        'file_paths',
+        'description',
+        'user_name',
+        'is_public',
+        'version',
+        'created_at',
+        'updated_at',
+    ];
 }

@@ -2,76 +2,59 @@
 
 namespace Modules\RolesAndPermissions\Http\Controllers;
 
-use App\Constants\TableConstants;
-use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreTableSettingsRequest;
 use App\Models\TableSettings;
+use App\Constants\TableConstants;
+use App\Http\Requests\StoreTableSettingsRequest;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Modules\RolesAndPermissions\Models\Role;
-use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Permission;
 
 class RolesAndPermissionsController extends Controller
 {
-    /**
-     * Menampilkan daftar sumber daya.
-     */
+    private const DEFAULT_LIMIT = 10;
+    private const DEFAULT_SORT_BY = 'name';
+    private const DEFAULT_SORT_ORDER = 'ASC';
+    private const EXCLUDED_COLUMNS = ['permissions'];
+
     public function index(Request $request)
     {
-        $savedSettings = $this->_getTableSettingsForModel(Role::class);
+        $savedSettings = $this->getTableSettingsForModel(Role::class);
 
-        $limits = [5, 10, 20, 50, 100];
-        $limit = $request->get('limit', $savedSettings->limit ?? 10);
-        $sortBy = $request->get('sort_by', 'name');
-        $sortOrder = $request->get('sort_order', 'ASC');
+        $limit = $request->get('limit', $savedSettings->limit ?? self::DEFAULT_LIMIT);
+        $sortBy = $request->get('sort_by', self::DEFAULT_SORT_BY);
+        $sortOrder = $request->get('sort_order', self::DEFAULT_SORT_ORDER);
 
-        // Mengambil semua kolom dan kolom yang terlihat
-        [$allColumns, $visibleColumns] = $this->_getColumnsForTable();
+        [$allColumns, $visibleColumns] = $this->getColumnsForTable();
+        $queryColumns = array_diff($visibleColumns, self::EXCLUDED_COLUMNS);
 
-        // Mengecualikan '' dari kueri basis data
-        $excludedColumns = ['permissions'];
-        $queryColumns = array_diff($visibleColumns, $excludedColumns);
-
-        $roles = Role::search(
-            keyword: $request->q,
-            columns: $queryColumns
-        )
-            ->sort(
-                sort_by: $sortBy,
-                sort_order: $sortOrder
-            );
-
-        $roles = $roles->paginate($limit)->through(fn($role) => $role->setAttribute('permissions', $role->permissions->pluck('name')->toArray()));
+        $roles = Role::search($request->q, $queryColumns)
+            ->sort($sortBy, $sortOrder)
+            ->paginate($limit)
+            ->through(fn($role) => $role->setAttribute('permissions', $role->permissions->pluck('name')->toArray()));
 
         return view('rolesandpermissions::index', [
             'title' => 'Daftar Role dan Permission',
             'columns' => $allColumns,
             'visibleColumns' => $visibleColumns,
-            'excludedSortColumns' => $excludedColumns,
-            'limits' => $limits,
+            'excludedSortColumns' => self::EXCLUDED_COLUMNS,
+            'limits' => [5, 10, 20, 50, 100],
             'roles' => $roles,
             'savedSettings' => $savedSettings
         ]);
     }
 
-    /**
-     * Menampilkan formulir untuk membuat sumber daya baru.
-     */
     public function create()
     {
-        $permissions = Permission::all()->groupBy('module');
-
         return view('rolesandpermissions::create', [
             'title' => 'Buat Role dan Permission',
-            'permissions' => $permissions
+            'permissions' => Permission::all()->groupBy('module')
         ]);
     }
 
-    /**
-     * Menyimpan sumber daya yang baru dibuat ke dalam penyimpanan.
-     */
     public function store(Request $request)
     {
         try {
@@ -82,111 +65,78 @@ class RolesAndPermissionsController extends Controller
             ]);
 
             $role = Role::create([
-                'name' => $request->input('role_name'),
+                'name' => $validated['role_name'],
                 'guard_name' => 'web',
             ]);
 
             $role->permissions()->attach($validated['permissions']);
 
-            return redirect()->route('roles.and.permissions.index')->with('success', 'Role dan permission berhasil dibuat.');
+            return redirect()->route('roles.and.permissions.index')
+                ->with('success', 'Role dan permission berhasil dibuat.');
         } catch (\Exception $e) {
-            Log::error('Kesalahan saat membuat role dan permissions: ' . $e->getMessage(), [
-                'exception' => $e,
-                'request' => $request->all(),
-            ]);
-
+            $this->logError('membuat', $e, $request->all());
             return back()->withErrors(['error' => 'Terjadi kesalahan saat membuat role. Silakan coba lagi nanti.']);
         }
     }
 
-    /**
-     * Menampilkan formulir untuk mengedit sumber daya yang ditentukan.
-     */
     public function edit(Role $role_and_permission)
     {
-        $permissions = Permission::all()->groupBy('module');
-        $role = Role::findOrFail($role_and_permission->id);
-        $rolePermissions = $role_and_permission->permissions->pluck('id')->toArray();
-
         return view('rolesandpermissions::edit', [
             'title' => 'Edit Role dan Permission',
-            'permissions' => $permissions,
-            'role' => $role,
-            'rolePermissions' => $rolePermissions
+            'permissions' => Permission::all()->groupBy('module'),
+            'role' => $role_and_permission,
+            'rolePermissions' => $role_and_permission->permissions->pluck('id')->toArray()
         ]);
     }
 
-    /**
-     * Memperbarui sumber daya yang ditentukan dalam penyimpanan.
-     */
     public function update(Request $request, Role $role_and_permission)
     {
         try {
-            $request->validate([
+            $validated = $request->validate([
                 'role_name' => 'required|string|max:255',
                 'permissions' => 'array',
                 'permissions.*' => 'exists:permissions,id',
             ]);
 
-            $role_and_permission->update(['name' => $request->input('role_name')]);
+            $role_and_permission->update(['name' => $validated['role_name']]);
             $role_and_permission->permissions()->sync($request->input('permissions', []));
 
-            return redirect()->route('roles.and.permissions.index')->with('success', 'Role dan permission berhasil diperbarui.');
+            return redirect()->route('roles.and.permissions.index')
+                ->with('success', 'Role dan permission berhasil diperbarui.');
         } catch (\Exception $e) {
-            Log::error('Kesalahan saat memperbarui role dan permissions: ' . $e->getMessage(), [
-                'exception' => $e,
-                'role_id' => $role_and_permission->id,
-                'request' => $request->all(),
-            ]);
-
+            $this->logError('memperbarui', $e, $request->all(), $role_and_permission->id);
             return back()->withErrors(['error' => 'Terjadi kesalahan saat memperbarui role. Silakan coba lagi nanti.']);
         }
     }
 
-    /**
-     * Menghapus sumber daya yang ditentukan dari penyimpanan.
-     */
     public function destroy(Role $role_and_permission)
     {
         try {
             $role_and_permission->delete();
-
-            return redirect()->route('roles.and.permissions.index')->with('success', 'Role dan permission berhasil dihapus.');
+            return redirect()->route('roles.and.permissions.index')
+                ->with('success', 'Role dan permission berhasil dihapus.');
         } catch (\Exception $e) {
-            Log::error('Kesalahan saat menghapus role dan permissions: ' . $e->getMessage(), [
-                'exception' => $e,
-                'role_id' => $role_and_permission->id,
-            ]);
-
+            $this->logError('menghapus', $e, [], $role_and_permission->id);
             return back()->withErrors(['error' => 'Terjadi kesalahan saat menghapus role. Silakan coba lagi nanti.']);
         }
     }
 
-    /**
-     * Menyimpan pengaturan tabel untuk pengguna.
-     */
     public function saveTableSettings(StoreTableSettingsRequest $request)
     {
         try {
             $modelClass = Role::class;
             $modelInstance = app($modelClass)->newInstance();
 
-            $tableName = $modelInstance->getTable();
-            $modelName = get_class($modelInstance);
-
-            $columns = $request->input('columns', []);
-            $showNumbering = $request->has('show_numbering') ? true : false;
-
             TableSettings::updateOrCreate(
                 [
                     'user_id' => Auth::id(),
-                    'table_name' => $tableName,
-                    'model_name' => $modelName,
+                    'table_name' => $modelInstance->getTable(),
+                    'model_name' => $modelClass,
                 ],
                 [
-                    'visible_columns' => json_encode($columns),
-                    'limit' => $request->input('limit', 10),
-                    'show_numbering' => $showNumbering,
+                    'visible_columns' => json_encode($request->input('columns', [])),
+                    'limit' => $request->input('limit', self::DEFAULT_LIMIT),
+                    'show_numbering' => $request->has('show_numbering'),
                 ]
             );
 
@@ -194,56 +144,50 @@ class RolesAndPermissionsController extends Controller
         } catch (ValidationException $e) {
             throw $e;
         } catch (\Exception $e) {
-            // Log error dan kembali dengan pesan gagal
             Log::error('Kesalahan saat menyimpan pengaturan tabel: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Gagal menyimpan pengaturan tabel.');
         }
     }
 
-    /**
-     * Mengambil semua kolom dan kolom yang terlihat untuk tabel.
-     */
-    private function _getColumnsForTable(): array
+    private function getColumnsForTable(): array
     {
         $allColumns = TableConstants::ROLE_AND_PERMISSION_TABLE_COLUMNS;
-
-        // Menggunakan fungsi yang dapat digunakan kembali untuk mendapatkan pengaturan tabel
-        $tableSettings = $this->_getTableSettingsForModel(Role::class);
-
-        // Mengambil kolom yang terlihat atau menggunakan default jika tidak diset
+        $tableSettings = $this->getTableSettingsForModel(Role::class);
         $visibleColumns = $tableSettings->visible_columns ?? $allColumns;
 
-        // Decode JSON jika perlu
-        $visibleColumns = is_string($visibleColumns) ? json_decode($visibleColumns, true) : $visibleColumns;
+        if (is_string($visibleColumns)) {
+            $visibleColumns = json_decode($visibleColumns, true);
+        }
 
         return [$allColumns, $visibleColumns];
     }
 
-    /**
-     * Mengambil pengaturan tabel untuk model dan tabel tertentu.
-     *
-     * @param string $modelClass Nama kelas model yang lengkap.
-     * @return mixed|null Pengaturan tabel atau null jika tidak ditemukan.
-     */
-    private function _getTableSettingsForModel(string $modelClass)
+    private function getTableSettingsForModel(string $modelClass)
     {
-        // Membuat instansi baru dari model untuk mengambil nama tabelnya
         $modelInstance = app($modelClass)->newInstance();
-        $tableName = $modelInstance->getTable();
-
-        // Memeriksa apakah Auth::user()->tableSettings bernilai null
         $userTableSettings = Auth::user()->tableSettings;
 
         if (is_null($userTableSettings)) {
             return null;
         }
 
-        // Mengambil pengaturan tabel pengguna untuk model dan tabel yang diberikan
-        $tableSettings = $userTableSettings
+        return $userTableSettings
             ->where('model_name', $modelClass)
-            ->where('table_name', $tableName)
+            ->where('table_name', $modelInstance->getTable())
             ->first();
+    }
 
-        return $tableSettings;
+    private function logError(string $action, \Exception $exception, array $requestData = [], $roleId = null)
+    {
+        $context = [
+            'exception' => $exception,
+            'request' => $requestData
+        ];
+
+        if ($roleId) {
+            $context['role_id'] = $roleId;
+        }
+
+        Log::error("Kesalahan saat {$action} role dan permissions: " . $exception->getMessage(), $context);
     }
 }
