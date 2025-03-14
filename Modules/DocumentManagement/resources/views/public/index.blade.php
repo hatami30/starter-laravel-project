@@ -9,6 +9,8 @@
     <!-- Google Fonts - Modern Sans Serif -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <link rel="shortcut icon" href="{{ asset('img/logo-kemenkes.png') }}" type="image/png">
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -949,19 +951,19 @@
                                         <div class="file-container">
                                             ${document.files.map(function (file, fileIndex) {
                                                 return `
-                                                                                            <div class="file-item">
-                                                                                                <span class="file-name">${file.file_name}</span>
-                                                                                                <div class="d-flex gap-2">
-                                                                                                    <input type="checkbox" class="file-checkbox" value="${file.file_path}" />
-                                                                                                    <a href="${file.file_path}" class="btn btn-sm btn-download" download="${file.file_name}" title="Download">
-                                                                                                        <i class="bi bi-download"></i> Download
-                                                                                                    </a>
-                                                                                                    <button type="button" class="btn btn-sm btn-view" onclick="viewFile('${file.file_path}', '${file.file_name}')" title="View">
-                                                                                                        <i class="bi bi-eye"></i> View
-                                                                                                    </button>
+                                                                                                <div class="file-item">
+                                                                                                    <span class="file-name">${file.file_name}</span>
+                                                                                                    <div class="d-flex gap-2">
+                                                                                                        <input type="checkbox" class="file-checkbox" value="${file.file_path}" />
+                                                                                                        <a href="${file.file_path}" class="btn btn-sm btn-download" download="${file.file_name}" title="Download">
+                                                                                                            <i class="bi bi-download"></i> Download
+                                                                                                        </a>
+                                                                                                        <button type="button" class="btn btn-sm btn-view" onclick="viewFile('${file.file_path}', '${file.file_name}')" title="View">
+                                                                                                            <i class="bi bi-eye"></i> View
+                                                                                                        </button>
+                                                                                                    </div>
                                                                                                 </div>
-                                                                                            </div>
-                                                                                        `;
+                                                                                            `;
                                             }).join('')}
                                         </div>
                                     </div>`;
