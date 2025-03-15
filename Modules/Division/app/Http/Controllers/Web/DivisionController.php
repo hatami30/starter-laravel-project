@@ -26,6 +26,8 @@ class DivisionController extends Controller
 
     public function index(Request $request)
     {
+        $title = 'Daftar Divisi';
+
         // Get saved table settings
         $savedSettings = $this->_getTableSettingsForModel(Division::class);
 
@@ -71,6 +73,7 @@ class DivisionController extends Controller
 
         // Return view with data
         return view('division::index', compact(
+            'title',
             'divisions',
             'allColumns',
             'visibleColumns',
@@ -114,7 +117,7 @@ class DivisionController extends Controller
 
     public function edit(Division $division)
     {
-        return view('division::edit', compact('division'));
+        return view('division::edit', compact('division'))->with('title', 'Edit Divisi');
     }
 
     public function update(DivisionUpdateRequest $request, Division $division)

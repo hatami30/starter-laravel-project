@@ -108,6 +108,7 @@ class DocumentManagementController extends Controller
             ];
 
             return view('document::index', [
+                'title' => 'Daftar Dokumen',
                 'documents' => $documents,
                 'columns' => $allColumns,
                 'visibleColumns' => $visibleColumns,
@@ -152,7 +153,7 @@ class DocumentManagementController extends Controller
         }
 
         return view('documentmanagement::create', [
-            'title' => 'Tambah Dokumen Baru',
+            'title' => 'Dokumen Baru',
             'divisions' => $divisions // Pass divisions to the view
         ]);
     }
@@ -239,7 +240,7 @@ class DocumentManagementController extends Controller
         // Fetch all divisions to show in the form
         $divisions = Division::all();
 
-        return view('document::edit', compact('document', 'divisions'));
+        return view('document::edit', compact('document', 'divisions'))->with('title', 'Edit Dokumen');
     }
 
     /**
